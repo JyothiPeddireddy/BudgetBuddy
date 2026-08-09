@@ -3,7 +3,8 @@ import logging
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from app.routers import auth, expenses, incomes, budgets
+from app.routers import auth, expenses, incomes, budgets, account
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("budgetbuddy")
@@ -17,6 +18,7 @@ app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(incomes.router, prefix="/incomes", tags=["Incomes"])
 app.include_router(expenses.router, prefix="/expenses", tags=["Expenses"])
 app.include_router(budgets.router, prefix="/budgets", tags=["Budgets"])
+app.include_router(account.router,prefix="/accounts",tags=["Accounts"])
 
 app.add_middleware(
     CORSMiddleware,

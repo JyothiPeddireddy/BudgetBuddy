@@ -7,6 +7,7 @@ class Expense(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    account_id = Column(Integer, ForeignKey("accounts.id", ondelete="SET NULL"), nullable=True)
     category = Column(String(100), nullable=False)
     amount = Column(Numeric(12, 2), nullable=False)
     description = Column(Text, nullable=True)
@@ -17,3 +18,4 @@ class Expense(Base):
     )
 
     owner = relationship("User", back_populates="expenses")
+    account = relationship("Account", back_populates="expenses")

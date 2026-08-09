@@ -10,11 +10,8 @@ export default function Login() {
       subtitle="Enter your email and password to continue."
     >
       <LoginForm />
-      <p className="mt-8 text-sm text-slate">
-        New here?{" "}
-        <Link to="/signup" className="text-ink underline underline-offset-2">
-          Open an account
-        </Link>
+      <p className="auth-footer">
+        New here? <Link to="/signup">Open an account</Link>
       </p>
     </AuthLayout>
   );

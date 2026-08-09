@@ -2,13 +2,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 @theme {
-  --color-paper: #F1F4EC;
-  --color-paper-line: #DCE3D5;
-  --color-ink: #14311D;
-  --color-ink-soft: #2A4A34;
-  --color-slate: #5B6A60;
-  --color-gold: #C39A2B;
-  --color-brick: #A23B2D;
+  /* Light Theme */
+  --color-paper: #F8FAFC;
+  --color-paper-line: #D1D5DB;
+  --color-ink: #0F172A;
+  --color-ink-soft: #475569;
+  --color-slate: #64748B;
+  --color-gold: #14B8A6;
+  --color-brick: #DC2626;
+
+  --color-emerald: #14B8A6;
+  --color-emerald-soft: #CCFBF1;
+  --color-coral: #EF4444;
+  --color-coral-soft: #FEE2E2;
+  --color-indigo: #14B8A6;
+  --color-indigo-soft: #ECFEFF;
+  --color-amber: #14B8A6;
+  --color-amber-soft: #F0FDFA;
 
   --font-display: "Fraunces", serif;
   --font-body: "Inter", sans-serif;
@@ -27,18 +37,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Faint ruled-paper texture for the form side */
-.ledger-lines {
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent,
-    transparent 39px,
-    var(--color-paper-line) 39px,
-    var(--color-paper-line) 40px
-  );
-}
-
-/* Ledger-style input: bottom border only, like writing on a ruled line */
 .ledger-input {
   width: 100%;
   background: transparent;
@@ -51,11 +49,40 @@ body {
   outline: none;
   transition: border-color 0.2s ease;
 }
+
 .ledger-input:focus {
   border-bottom-color: var(--color-gold);
 }
+
 .ledger-input::placeholder {
-  color: #A8B3A9;
+  color: #94A3B8;
+}
+
+/* Modern card field style */
+.field {
+  width: 100%;
+  background: #FFFFFF;
+  border: 1px solid var(--color-paper-line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-ink);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field:focus {
+  border-color: var(--color-indigo);
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+}
+
+.card {
+  background: #FFFFFF;
+  border: 1px solid var(--color-paper-line);
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08),
+              0 8px 24px rgba(15, 23, 42, 0.06);
 }
 
 .eyebrow {
@@ -67,31 +94,160 @@ body {
   margin-bottom: 10px;
 }
 
-/* Ambient ledger ticker, left panel */
+.mask-fade {
+  mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+}
+
 .ticker-track {
   animation: ticker-scroll 22s linear infinite;
 }
+
 @keyframes ticker-scroll {
-  from { transform: translateY(0); }
-  to { transform: translateY(-50%); }
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
 }
 
-/* Ink stamp, verification success */
 .stamp {
   animation: stamp-press 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.1) forwards;
   transform-origin: center;
 }
+
 @keyframes stamp-press {
-  0%   { transform: scale(2.4) rotate(-14deg); opacity: 0; }
-  60%  { transform: scale(0.92) rotate(-7deg); opacity: 1; }
-  100% { transform: scale(1) rotate(-7deg); opacity: 1; }
+  0% {
+    transform: scale(2.4) rotate(-14deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(0.92) rotate(-7deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(-7deg);
+    opacity: 1;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ticker-track { animation: none; }
-  .stamp { animation: none; }
+  .ticker-track {
+    animation: none;
+  }
+
+  .stamp {
+    animation: none;
+  }
 }
 
-.mask-fade {
-  mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+
+/* Refined auth typography */
+.auth-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-emerald);
+  margin-bottom: 14px;
+}
+
+.auth-title {
+  font-family: var(--font-display);
+  font-size: 42px;
+  line-height: 1.15;
+  font-weight: 500;
+  color: var(--color-ink);
+  letter-spacing: -0.01em;
+  margin-bottom: 10px;
+}
+
+.auth-subtitle {
+  font-family: var(--font-body);
+  font-size: 15.5px;
+  color: var(--color-slate);
+  line-height: 1.5;
+  margin-bottom: 36px;
+}
+
+.auth-label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-slate);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.auth-field {
+  width: 100%;
+  background: #FFFFFF;
+  border: 1.5px solid var(--color-paper-line);
+  border-radius: 10px;
+  padding: 13px 14px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--color-ink);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.auth-field:focus {
+  border-color: var(--color-indigo);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.08);
+}
+.auth-field::placeholder {
+  color: #A3AEA5;
+  font-weight: 400;
+}
+
+.auth-button {
+  width: 100%;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 14px;
+  border-radius: 10px;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.auth-button:hover:not(:disabled) {
+  background: var(--color-ink-soft);
+}
+.auth-button:active:not(:disabled) {
+  transform: scale(0.99);
+}
+.auth-button:disabled {
+  opacity: 0.5;
+}
+
+.auth-footer {
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  color: var(--color-slate);
+  margin-top: 32px;
+}
+.auth-footer a {
+  color: var(--color-ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+
+.toast-item {
+  animation: toast-slide-in 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+  min-width: 240px;
+  max-width: 360px;
+}
+@keyframes toast-slide-in {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast-item { animation: none; }
 }
