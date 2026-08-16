@@ -11,6 +11,7 @@ import ExpensesPage from "./pages/ExpensesPage";
 import IncomePage from "./pages/IncomePage";
 import BudgetsPage from "./pages/BudgetsPage";
 import AccountsPage from "./pages/AccountsPage";
+import SavingsGoalsPage from "./pages/SavingsGoalsPage";
 
 export default function App() {
   return (
@@ -35,6 +36,7 @@ export default function App() {
               <Route path="expenses" element={<ExpensesPage />} />
               <Route path="income" element={<IncomePage />} />
               <Route path="budgets" element={<BudgetsPage />} />
+              <Route path="goals" element={<SavingsGoalsPage />} />
             </Route>
           </Routes>
         </AuthProvider>

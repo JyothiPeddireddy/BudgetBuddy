@@ -12,7 +12,10 @@ router = APIRouter()
 
 @router.post("/", response_model=AccountOut)
 def add_account(account_in: AccountCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
-    return create_account(db, current_user.id, account_in)
+    result = create_account(db, current_user.id, account_in)
+    if result == "duplicate":
+        raise HTTPException(status_code=400, detail="You already have an account with this name and bank.")
+    return result
 
 @router.get("/", response_model=list[AccountOut])
 def list_accounts(db: Session = Depends(get_db), current_user = Depends(get_current_user)):
@@ -27,10 +30,12 @@ def get_single_account(account_id: int, db: Session = Depends(get_db), current_u
 
 @router.put("/{account_id}", response_model=AccountOut)
 def edit_account(account_id: int, account_in: AccountUpdate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
-    account = update_account(db, account_id, current_user.id, account_in)
-    if not account:
+    result = update_account(db, account_id, current_user.id, account_in)
+    if result == "not_found":
         raise HTTPException(status_code=404, detail="Account not found")
-    return account
+    if result == "duplicate":
+        raise HTTPException(status_code=400, detail="You already have an account with this name and bank.")
+    return result
 
 @router.delete("/{account_id}")
 def remove_account(account_id: int, db: Session = Depends(get_db), current_user = Depends(get_current_user)):

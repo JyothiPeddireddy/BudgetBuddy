@@ -3,7 +3,8 @@ import logging
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from app.routers import auth, expenses, incomes, budgets, account
+from app.routers import auth, expenses, incomes, budgets, account, savings_goals, notifications
+# ...
 
 
 logging.basicConfig(level=logging.INFO)
@@ -19,6 +20,8 @@ app.include_router(incomes.router, prefix="/incomes", tags=["Incomes"])
 app.include_router(expenses.router, prefix="/expenses", tags=["Expenses"])
 app.include_router(budgets.router, prefix="/budgets", tags=["Budgets"])
 app.include_router(account.router,prefix="/accounts",tags=["Accounts"])
+app.include_router(savings_goals.router, prefix="/goals", tags=["Savings Goals"])
+app.include_router(notifications.router, prefix="/notifications", tags=["Notifications"])
 
 app.add_middleware(
     CORSMiddleware,

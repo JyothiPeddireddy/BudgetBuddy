@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { addExpense } from "../../api/transactions";
-import { useEffect } from "react";
 import { getAccounts } from "../../api/accounts";
+import { todayLocalISO } from "../../utils/date";
 
 const CATEGORIES = ["Food", "Travel", "Shopping", "Education", "Entertainment", "Miscellaneous"];
 
@@ -9,17 +9,17 @@ export default function ExpenseForm({ onAdded }) {
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(todayLocalISO());
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [accounts, setAccounts] = useState([]);
   const [accountId, setAccountId] = useState("");
 
   useEffect(() => {
-  getAccounts().then((res) => {
-    setAccounts(res.data);
-    if (res.data.length > 0) setAccountId(res.data[0].id);
-  });
+    getAccounts().then((res) => {
+      setAccounts(res.data);
+      if (res.data.length > 0) setAccountId(res.data[0].id);
+    });
   }, []);
 
   const handleSubmit = async (e) => {
@@ -27,7 +27,7 @@ export default function ExpenseForm({ onAdded }) {
     setError("");
     setSubmitting(true);
     try {
-      await addExpense({ account_id: accountId,category,amount: parseFloat(amount),description,date});
+      await addExpense({ account_id: accountId, category, amount: parseFloat(amount), description, date });
       setAmount("");
       setDescription("");
       onAdded();
@@ -50,19 +50,14 @@ export default function ExpenseForm({ onAdded }) {
           className="field"
           required
         >
-
           {accounts.length === 0 && (
-            <option value="">
-              No accounts — add one first
-            </option>
+            <option value="">No accounts — add one first</option>
           )}
-
           {accounts.map((a) => (
             <option key={a.id} value={a.id}>
               {a.account_name}
             </option>
           ))}
-
         </select>
         <input
           type="number" step="0.01" min="0.01" required

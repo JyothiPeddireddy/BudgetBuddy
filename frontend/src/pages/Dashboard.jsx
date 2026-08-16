@@ -1,18 +1,26 @@
 import { useEffect, useState, useRef } from "react";
 import { TrendingUp, TrendingDown, Wallet2, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { getDashboard } from "../api/transactions";
+import { getGoals } from "../api/goals";
+
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
   const [selected, setSelected] = useState(null); // { year, month } or null for "All time"
+  const [goals, setGoals] = useState([]);
 
   useEffect(() => {
     setData(null);
     const call = selected ? getDashboard(selected.year, selected.month) : getDashboard();
     call.then((res) => setData(res.data));
   }, [selected]);
+
+  useEffect(() => {
+    getGoals().then((res) => setGoals(res.data.filter((g) => g.status !== "completed").slice(0, 3)));
+  }, []);
 
   const eyebrowLabel = selected
     ? new Date(selected.year, selected.month - 1).toLocaleDateString("en-US", { month: "long", year: "numeric" })
@@ -46,6 +54,28 @@ export default function Dashboard() {
                 <span className="font-mono text-sm text-ink">{c.total.toFixed(2)}</span>
               </li>
             ))}
+          </ul>
+        </div>
+      )}
+
+      {goals.length > 0 && (
+        <div className="card p-6">
+          <h2 className="font-display text-lg text-ink mb-4">Savings goals</h2>
+          <ul className="space-y-4">
+            {goals.map((g) => {
+              const pct = Math.min(100, (g.current_amount / g.target_amount) * 100);
+              return (
+                <li key={g.id}>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <span className="text-sm text-slate">{g.title}</span>
+                    <span className="font-mono text-xs text-slate">{pct.toFixed(0)}%</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-indigo rounded-full" style={{ width: `${pct}%` }} />
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

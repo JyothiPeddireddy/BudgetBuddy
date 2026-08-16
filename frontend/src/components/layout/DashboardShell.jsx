@@ -1,6 +1,7 @@
 import { NavLink, useNavigate, Outlet } from "react-router-dom";
-import { LayoutDashboard, Receipt, Wallet, PiggyBank, LogOut, Landmark } from "lucide-react";
+import { LayoutDashboard, Receipt, Wallet, PiggyBank, LogOut, Landmark, Target } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import NotificationBell from "../notifications/NotificationBell";
 
 const NAV_ITEMS = [
   { to: "/dashboard", label: "Overview", end: true, icon: LayoutDashboard },
@@ -8,6 +9,7 @@ const NAV_ITEMS = [
   { to: "/dashboard/expenses", label: "Expenses", icon: Receipt },
   { to: "/dashboard/income", label: "Income", icon: Wallet },
   { to: "/dashboard/budgets", label: "Budgets", icon: PiggyBank },
+  { to: "/dashboard/goals", label: "Goals", icon: Target },
 ];
 
 export default function DashboardShell({ children }) {
@@ -69,7 +71,12 @@ export default function DashboardShell({ children }) {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto"><Outlet /></main>
+      <main className="flex-1 overflow-y-auto">
+        <div className="flex justify-end px-8 pt-6">
+          <NotificationBell />
+        </div>
+        <Outlet />
+      </main>
     </div>
   );
 }

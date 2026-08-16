@@ -4,3 +4,5 @@ from app.models.income import Income
 from app.models.expense import Expense
 from app.models.budget import Budget
 from app.models.account import Account
+from app.models.savings_goal import SavingsGoal
+from app.models.notification import Notification

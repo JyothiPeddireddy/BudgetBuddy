@@ -10,10 +10,12 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
     role = Column(String, default="student")
-    is_verified = Column(Boolean, default=False, nullable=False)   
+    is_verified = Column(Boolean, default=False, nullable=False)
 
     profile = relationship("Profile", back_populates="owner", uselist=False)
     expenses = relationship("Expense", back_populates="owner", cascade="all, delete-orphan")
     incomes = relationship("Income", back_populates="owner", cascade="all, delete-orphan")
     budgets = relationship("Budget", back_populates="owner", cascade="all, delete-orphan")
     accounts = relationship("Account", back_populates="owner", cascade="all, delete-orphan")
+    savings_goals = relationship("SavingsGoal", back_populates="owner", cascade="all, delete-orphan")
+    notifications = relationship("Notification", back_populates="owner", cascade="all, delete-orphan")

@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.models.expense import Expense
 from app.models.account import Account
 from app.schemas.expense import ExpenseCreate, ExpenseUpdate
+from sqlalchemy import extract, func
 
 def create_expense(db: Session, user_id: int, expense_in: ExpenseCreate):
     account = db.query(Account).filter(
@@ -78,3 +79,17 @@ def delete_expense(db: Session, expense_id: int, user_id: int) -> bool:
     db.delete(expense)
     db.commit()
     return True
+
+
+def get_total_spent_this_month(db: Session, user_id: int, category: str, year: int, month: int) -> float:
+    total = (
+        db.query(func.sum(Expense.amount))
+        .filter(
+            Expense.user_id == user_id,
+            Expense.category == category,
+            extract("year", Expense.date) == year,
+            extract("month", Expense.date) == month,
+        )
+        .scalar()
+    )
+    return float(total or 0)

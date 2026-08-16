@@ -6,6 +6,7 @@ import AccountList from "../components/accounts/AccountList";
 
 export default function AccountsPage() {
   const [accounts, setAccounts] = useState([]);
+  const [editingAccount, setEditingAccount] = useState(null);
   const { showToast } = useToast();
 
   const load = async () => {
@@ -22,6 +23,7 @@ export default function AccountsPage() {
 
   const handleUpdated = async () => {
     await load();
+    setEditingAccount(null);
     showToast("Account updated");
   };
 
@@ -37,11 +39,16 @@ export default function AccountsPage() {
         <h1 className="font-display text-3xl text-ink">Accounts</h1>
       </div>
       <div className="card p-6">
-        <AccountForm onAdded={handleAdded} />
+        <AccountForm
+          onAdded={handleAdded}
+          onUpdated={handleUpdated}
+          editingAccount={editingAccount}
+          onCancelEdit={() => setEditingAccount(null)}
+        />
       </div>
       <div className="card p-6">
         <h2 className="font-display text-lg text-ink mb-4">Your accounts</h2>
-        <AccountList accounts={accounts} onDeleted={handleDeleted} onUpdated={handleUpdated} />
+        <AccountList accounts={accounts} onDeleted={handleDeleted} onEdit={setEditingAccount} />
       </div>
     </div>
   );

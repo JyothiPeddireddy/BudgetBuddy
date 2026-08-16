@@ -42,3 +42,10 @@ def delete_budget(db: Session, budget_id: int, user_id: int) -> bool:
     db.delete(budget)
     db.commit()
     return True
+
+def get_budget_for_category(db: Session, user_id: int, category: str, month_year: str):
+    return (
+        db.query(Budget)
+        .filter(Budget.user_id == user_id, Budget.category == category, Budget.month_year == month_year)
+        .first()
+    )

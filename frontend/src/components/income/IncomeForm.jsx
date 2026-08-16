@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { addIncome } from "../../api/transactions";
 import { getAccounts } from "../../api/accounts";
+import { todayLocalISO } from "../../utils/date";
 
 export default function IncomeForm({ onAdded }) {
   const [accounts, setAccounts] = useState([]);
   const [accountId, setAccountId] = useState("");
   const [source, setSource] = useState("");
   const [amount, setAmount] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(todayLocalISO());
   const [notes, setNotes] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);

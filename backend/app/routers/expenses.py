@@ -5,7 +5,7 @@ from app.database import get_db
 from app.schemas.expense import ExpenseCreate, ExpenseUpdate, ExpenseOut
 from app.crud.expense import (
     create_expense, get_expenses_by_user, get_expense,
-    update_expense, delete_expense,
+    update_expense, delete_expense, get_total_spent_this_month,
 )
 from app.models.expense import Expense
 from app.core.deps import get_current_user
@@ -14,6 +14,8 @@ from datetime import date
 from sqlalchemy import extract
 from app.models.income import Income
 from typing import Optional
+from app.crud.budget import get_budget_for_category
+from app.crud.notification import create_notification, budget_alert_exists
 
 
 router = APIRouter()
@@ -23,6 +25,23 @@ def add_expense(expense_in: ExpenseCreate, db: Session = Depends(get_db), curren
     expense = create_expense(db, current_user.id, expense_in)
     if not expense:
         raise HTTPException(status_code=404, detail="Account not found")
+
+    month_year = expense.date.strftime("%Y-%m")
+    budget = get_budget_for_category(db, current_user.id, expense.category, month_year)
+    print(f"DEBUG: category={expense.category!r}, month_year={month_year!r}, budget_found={budget}")
+    if budget:
+        total_spent = get_total_spent_this_month(
+            db, current_user.id, expense.category, expense.date.year, expense.date.month
+        )
+        print(f"DEBUG: total_spent={total_spent}, limit={float(budget.monthly_limit)}")
+        if total_spent > float(budget.monthly_limit):
+            print("DEBUG: threshold crossed, creating notification")
+            message = f"You've exceeded your {expense.category} budget for {month_year}"
+            if not budget_alert_exists(db, current_user.id, message):
+                create_notification(db, current_user.id, message, "budget_alert")
+            else:
+                print("DEBUG: alert already exists, skipping")
+
     return expense
 
 @router.get("/", response_model=list[ExpenseOut])
