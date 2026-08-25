@@ -61,45 +61,51 @@ export default function AccountForm({ onAdded, onUpdated, editingAccount, onCanc
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
-        <input
-          type="text" required value={accountName}
-          onChange={(e) => setAccountName(e.target.value)}
-          placeholder="Account name (e.g. SBI Salary)" className="field"
-        />
-        <input
-          type="text" value={bankName}
-          onChange={(e) => setBankName(e.target.value)}
-          placeholder="Bank name (optional)" className="field"
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div>
+        <label className="block text-xs font-semibold text-slate mb-1.5">Bank</label>
         <select value={accountType} onChange={(e) => setAccountType(e.target.value)} className="field">
           {TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
         </select>
+      </div>
+      <div>
+        <label className="block text-xs font-semibold text-slate mb-1.5">Account Name</label>
+        <input
+          type="text" required value={accountName}
+          onChange={(e) => setAccountName(e.target.value)}
+          placeholder="Enter account name" className="field"
+        />
+      </div>
+      <div>
+        <label className="block text-xs font-semibold text-slate mb-1.5">Bank Name (optional)</label>
+        <input
+          type="text" value={bankName}
+          onChange={(e) => setBankName(e.target.value)}
+          placeholder="Enter bank name" className="field"
+        />
+      </div>
+      <div>
+        <label className="block text-xs font-semibold text-slate mb-1.5">Initial Balance</label>
         <input
           type="number" step="0.01" value={balance}
           onChange={(e) => setBalance(e.target.value)}
-          placeholder="Starting balance" className="field"
+          placeholder="0.00" className="field"
         />
       </div>
       {error && <p className="text-sm text-coral">{error}</p>}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 pt-2">
+        <button
+          type="button"
+          onClick={onCancelEdit}
+          className="flex-1 px-5 py-2.5 rounded-lg text-sm font-semibold border border-slate-200 text-slate hover:text-ink transition-colors"
+        >
+          Cancel
+        </button>
         <button
           type="submit" disabled={submitting}
-          className="bg-indigo text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="flex-1 bg-emerald text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
         >
-          {submitting ? (isEditing ? "Updating…" : "Adding…") : (isEditing ? "Update account" : "Add account")}
+          {submitting ? (isEditing ? "Updating…" : "Adding…") : (isEditing ? "Update Account" : "Add Account")}
         </button>
-        {isEditing && (
-          <button
-            type="button"
-            onClick={onCancelEdit}
-            className="text-sm text-slate hover:text-ink"
-          >
-            Cancel
-          </button>
-        )}
       </div>
     </form>
   );

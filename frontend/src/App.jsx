@@ -4,7 +4,9 @@ import { ToastProvider } from "./context/ToastContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import VerifyEmail from "./pages/VerifyEmail";
+import VerifyOtp from "./pages/VerifyOtp";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import DashboardShell from "./components/layout/DashboardShell";
 import Dashboard from "./pages/Dashboard";
 import ExpensesPage from "./pages/ExpensesPage";
@@ -12,6 +14,10 @@ import IncomePage from "./pages/IncomePage";
 import BudgetsPage from "./pages/BudgetsPage";
 import AccountsPage from "./pages/AccountsPage";
 import SavingsGoalsPage from "./pages/SavingsGoalsPage";
+import NotificationsPage from "./pages/NotificationsPage";
+import ReportsPage from "./pages/ReportsPage";
+
+
 
 export default function App() {
   return (
@@ -22,7 +28,9 @@ export default function App() {
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/verify-otp" element={<VerifyOtp />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route
               path="/dashboard"
               element={
@@ -37,6 +45,8 @@ export default function App() {
               <Route path="income" element={<IncomePage />} />
               <Route path="budgets" element={<BudgetsPage />} />
               <Route path="goals" element={<SavingsGoalsPage />} />
+              <Route path="notifications" element={<NotificationsPage />} />
+              <Route path="reports" element={<ReportsPage />} />
             </Route>
           </Routes>
         </AuthProvider>

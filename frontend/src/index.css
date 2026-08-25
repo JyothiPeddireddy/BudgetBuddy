@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 @theme {
   /* Light Theme */
@@ -20,7 +20,7 @@
   --color-amber: #14B8A6;
   --color-amber-soft: #F0FDFA;
 
-  --font-display: "Fraunces", serif;
+  --font-display: "Poppins", "Inter", sans-serif;
   --font-body: "Inter", sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
 }
@@ -35,6 +35,14 @@ body {
   color: var(--color-ink);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-weight: 700;
+}
+
+.font-mono {
+  font-weight: 600;
 }
 
 .ledger-input {
@@ -63,7 +71,7 @@ body {
   width: 100%;
   background: #FFFFFF;
   border: 1px solid var(--color-paper-line);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 10px 12px;
   font-family: var(--font-body);
   font-size: 14px;
@@ -80,9 +88,9 @@ body {
 .card {
   background: #FFFFFF;
   border: 1px solid var(--color-paper-line);
-  border-radius: 14px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08),
-              0 8px 24px rgba(15, 23, 42, 0.06);
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04),
+              0 6px 20px rgba(15, 23, 42, 0.05);
 }
 
 .eyebrow {
@@ -155,9 +163,9 @@ body {
 
 .auth-title {
   font-family: var(--font-display);
-  font-size: 42px;
-  line-height: 1.15;
-  font-weight: 500;
+  font-size: 38px;
+  line-height: 1.2;
+  font-weight: 700;
   color: var(--color-ink);
   letter-spacing: -0.01em;
   margin-bottom: 10px;
@@ -186,7 +194,7 @@ body {
   width: 100%;
   background: #FFFFFF;
   border: 1.5px solid var(--color-paper-line);
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 13px 14px;
   font-family: var(--font-body);
   font-size: 15px;
@@ -205,18 +213,18 @@ body {
 
 .auth-button {
   width: 100%;
-  background: var(--color-ink);
-  color: var(--color-paper);
+  background: var(--color-emerald);
+  color: #FFFFFF;
   font-family: var(--font-body);
   font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.01em;
   padding: 14px;
-  border-radius: 10px;
+  border-radius: 12px;
   transition: background 0.15s ease, transform 0.1s ease;
 }
 .auth-button:hover:not(:disabled) {
-  background: var(--color-ink-soft);
+  opacity: 0.9;
 }
 .auth-button:active:not(:disabled) {
   transform: scale(0.99);
@@ -232,7 +240,7 @@ body {
   margin-top: 32px;
 }
 .auth-footer a {
-  color: var(--color-ink);
+  color: var(--color-emerald);
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;

@@ -1,24 +1,40 @@
 import { useState, useEffect } from "react";
-import { addIncome } from "../../api/transactions";
+import { addIncome, updateIncome } from "../../api/transactions";
 import { getAccounts } from "../../api/accounts";
-import { todayLocalISO } from "../../utils/date";
 
-export default function IncomeForm({ onAdded }) {
+export default function IncomeForm({ onAdded, editingIncome, onUpdated, onCancelEdit }) {
   const [accounts, setAccounts] = useState([]);
   const [accountId, setAccountId] = useState("");
   const [source, setSource] = useState("");
   const [amount, setAmount] = useState("");
-  const [date, setDate] = useState(todayLocalISO());
+  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [notes, setNotes] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  const isEditing = Boolean(editingIncome);
+
   useEffect(() => {
     getAccounts().then((res) => {
       setAccounts(res.data);
-      if (res.data.length > 0) setAccountId(res.data[0].id);
+      if (!editingIncome && res.data.length > 0) setAccountId(res.data[0].id);
     });
   }, []);
+
+  useEffect(() => {
+    if (editingIncome) {
+      setAccountId(editingIncome.account_id ?? "");
+      setSource(editingIncome.source);
+      setAmount(String(editingIncome.amount));
+      setDate(editingIncome.date);
+      setNotes(editingIncome.notes || "");
+    } else {
+      setSource("");
+      setAmount("");
+      setNotes("");
+      setDate(new Date().toISOString().slice(0, 10));
+    }
+  }, [editingIncome]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,19 +47,26 @@ export default function IncomeForm({ onAdded }) {
 
     setSubmitting(true);
     try {
-      await addIncome({
+      const payload = {
         account_id: Number(accountId),
         source,
         amount: parseFloat(amount),
         date,
         notes,
-      });
-      setSource("");
-      setAmount("");
-      setNotes("");
-      onAdded();
+      };
+
+      if (isEditing) {
+        await updateIncome(editingIncome.id, payload);
+        onUpdated();
+      } else {
+        await addIncome(payload);
+        setSource("");
+        setAmount("");
+        setNotes("");
+        onAdded();
+      }
     } catch (err) {
-      setError(err.response?.data?.detail || "Could not add income.");
+      setError(err.response?.data?.detail || "Could not save income.");
     } finally {
       setSubmitting(false);
     }
@@ -57,12 +80,7 @@ export default function IncomeForm({ onAdded }) {
           onChange={(e) => setSource(e.target.value)}
           placeholder="Source (e.g. Salary)" className="field"
         />
-        <select
-          value={accountId}
-          onChange={(e) => setAccountId(e.target.value)}
-          className="field"
-          required
-        >
+        <select value={accountId} onChange={(e) => setAccountId(e.target.value)} className="field" required>
           {accounts.length === 0 && <option value="">No accounts — add one first</option>}
           {accounts.map((a) => (
             <option key={a.id} value={a.id}>{a.account_name}</option>
@@ -84,12 +102,23 @@ export default function IncomeForm({ onAdded }) {
         placeholder="Notes (optional)" className="field"
       />
       {error && <p className="text-sm text-coral">{error}</p>}
-      <button
-        type="submit" disabled={submitting || !accountId}
-        className="bg-emerald text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
-      >
-        {submitting ? "Adding…" : "Add income"}
-      </button>
+      <div className="flex gap-3">
+        <button
+          type="submit" disabled={submitting || !accountId}
+          className="bg-emerald text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+        >
+          {submitting ? "Saving…" : isEditing ? "Update income" : "Add income"}
+        </button>
+        {isEditing && (
+          <button
+            type="button"
+            onClick={onCancelEdit}
+            className="px-5 py-2.5 rounded-lg text-sm text-slate hover:text-ink transition-colors"
+          >
+            Cancel
+          </button>
+        )}
+      </div>
     </form>
   );
 }

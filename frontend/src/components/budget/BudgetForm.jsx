@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { addBudget } from "../../api/transactions";
+import { useState, useEffect } from "react";
+import { addBudget, updateBudget } from "../../api/transactions";
 
 const CATEGORIES = [
   "Food",
@@ -10,7 +10,7 @@ const CATEGORIES = [
   "Miscellaneous",
 ];
 
-export default function BudgetForm({ onAdded }) {
+export default function BudgetForm({ onAdded, onUpdated, editingBudget, onCancelEdit }) {
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [monthlyLimit, setMonthlyLimit] = useState("");
   const [monthYear, setMonthYear] = useState(
@@ -19,22 +19,44 @@ export default function BudgetForm({ onAdded }) {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  const isEditing = Boolean(editingBudget);
+
+  useEffect(() => {
+    if (editingBudget) {
+      setCategory(editingBudget.category);
+      setMonthlyLimit(String(editingBudget.monthly_limit));
+      setMonthYear(editingBudget.month_year);
+      setError("");
+    } else {
+      setCategory(CATEGORIES[0]);
+      setMonthlyLimit("");
+      setMonthYear(new Date().toISOString().slice(0, 7));
+      setError("");
+    }
+  }, [editingBudget]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSubmitting(true);
 
-    try {
-      await addBudget({
-        category,
-        monthly_limit: parseFloat(monthlyLimit),
-        month_year: monthYear,
-      });
+    const payload = {
+      category,
+      monthly_limit: parseFloat(monthlyLimit),
+      month_year: monthYear,
+    };
 
-      setMonthlyLimit("");
-      onAdded();
+    try {
+      if (isEditing) {
+        await updateBudget(editingBudget.id, payload);
+        onUpdated();
+      } else {
+        await addBudget(payload);
+        setMonthlyLimit("");
+        onAdded();
+      }
     } catch (err) {
-      setError(err.response?.data?.detail || "Could not add budget.");
+      setError(err.response?.data?.detail || `Could not ${isEditing ? "update" : "add"} budget.`);
     } finally {
       setSubmitting(false);
     }
@@ -77,13 +99,24 @@ export default function BudgetForm({ onAdded }) {
 
       {error && <p className="text-sm text-indigo">{error}</p>}
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="bg-[#2DD4BF] text-slate-900 font-semibold px-5 py-2.5 rounded-xl hover:bg-[#14B8A6] transition-all"
-      >
-        {submitting ? "Saving…" : "Set budget"}
-      </button>
+      <div className="flex items-center gap-3">
+        <button
+          type="submit"
+          disabled={submitting}
+          className="bg-[#2DD4BF] text-slate-900 font-semibold px-5 py-2.5 rounded-xl hover:bg-[#14B8A6] transition-all disabled:opacity-50"
+        >
+          {submitting ? (isEditing ? "Updating…" : "Saving…") : (isEditing ? "Update budget" : "Set budget")}
+        </button>
+        {isEditing && (
+          <button
+            type="button"
+            onClick={onCancelEdit}
+            className="text-sm text-slate hover:text-ink"
+          >
+            Cancel
+          </button>
+        )}
+      </div>
     </form>
   );
 }

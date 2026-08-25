@@ -1,103 +1,82 @@
 import { useState } from "react";
-import { deleteExpense, updateExpense } from "../../api/transactions";
+import { ArrowRight } from "lucide-react";
+import { deleteExpense } from "../../api/transactions";
+import { getCategoryMeta } from "../../utils/categoryIcons";
 
-export default function ExpenseList({ expenses, onDeleted, onUpdated }) {
-  const [editingId, setEditingId] = useState(null);
-  const [editData, setEditData] = useState({ category: "", amount: "", date: "", description: "" });
+export default function ExpenseList({ expenses, onDeleted, onEdit }) {
+  const [confirmingId, setConfirmingId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const handleDelete = async (id) => {
-    await deleteExpense(id);
-    onDeleted();
-  };
-
-  const startEdit = (e) => {
-    setEditingId(e.id);
-    setEditData({
-      category: e.category,
-      amount: e.amount,
-      date: e.date,
-      description: e.description || "",
-    });
-  };
-
-  const cancelEdit = () => setEditingId(null);
-
-  const saveEdit = async (id) => {
-    await updateExpense(id, {
-      ...editData,
-      amount: parseFloat(editData.amount),
-    });
-    setEditingId(null);
-    onUpdated();
+    setDeleting(true);
+    try {
+      await deleteExpense(id);
+      onDeleted();
+    } finally {
+      setDeleting(false);
+      setConfirmingId(null);
+    }
   };
 
   if (!expenses.length) {
-    return <p className="text-sm text-slate">No expenses yet.</p>;
+    return <p className="text-sm text-slate">No expenses found.</p>;
   }
 
   return (
-    <ul className="font-mono text-sm">
-      {expenses.map((e) =>
-        editingId === e.id ? (
-          <li key={e.id} className="py-3 space-y-2">
-            <input
-              className="border rounded px-2 py-1 w-full text-sm"
-              value={editData.category}
-              onChange={(ev) => setEditData({ ...editData, category: ev.target.value })}
-            />
-            <input
-              type="number"
-              className="border rounded px-2 py-1 w-full text-sm"
-              value={editData.amount}
-              onChange={(ev) => setEditData({ ...editData, amount: ev.target.value })}
-            />
-            <input
-              type="date"
-              className="border rounded px-2 py-1 w-full text-sm"
-              value={editData.date}
-              onChange={(ev) => setEditData({ ...editData, date: ev.target.value })}
-            />
-            <input
-              className="border rounded px-2 py-1 w-full text-sm"
-              placeholder="Description"
-              value={editData.description}
-              onChange={(ev) => setEditData({ ...editData, description: ev.target.value })}
-            />
-            <div className="flex gap-3">
-              <button onClick={() => saveEdit(e.id)} className="text-xs text-emerald hover:underline">
-                Save
-              </button>
-              <button onClick={cancelEdit} className="text-xs text-slate hover:underline">
-                Cancel
-              </button>
-            </div>
-          </li>
-        ) : (
-          <li key={e.id} className="flex justify-between items-center py-3">
-            <div>
-              <span className="text-ink">{e.category}</span>
-              {e.description && <span className="text-slate"> — {e.description}</span>}
-              <span className="block text-xs text-slate/60">{e.date}</span>
+    <ul className="space-y-1">
+      {expenses.map((e) => {
+        const { icon: Icon, bg, text } = getCategoryMeta(e.category);
+        const isConfirming = confirmingId === e.id;
+        return (
+          <li key={e.id} className="group flex items-center justify-between py-2.5 rounded-lg hover:bg-slate-50/60 px-1 -mx-1 transition-colors">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className={`w-9 h-9 rounded-lg ${bg} flex items-center justify-center shrink-0`}>
+                <Icon size={16} className={text} strokeWidth={2.2} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-ink truncate">
+                  {e.category}{e.description ? ` — ${e.description}` : ""}
+                </p>
+                <p className="text-xs text-slate">
+                  {new Date(e.date).toLocaleDateString("en-US", { month: "short", day: "2-digit" })}
+                </p>
+              </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <span className="text-coral font-medium">-{e.amount.toFixed(2)}</span>
-              <button
-                onClick={() => startEdit(e)}
-                className="text-xs px-2.5 py-1 rounded-md border border-slate/30 text-slate hover:border-ink hover:text-ink transition-colors"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => handleDelete(e.id)}
-                className="text-xs px-2.5 py-1 rounded-md border border-coral/30 text-coral hover:bg-coral hover:text-white transition-colors"
-              >
-                Delete
-              </button>
-            </div>
+            {isConfirming ? (
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => handleDelete(e.id)}
+                  disabled={deleting}
+                  className="px-2.5 py-1 rounded-full text-xs font-semibold bg-coral text-white hover:opacity-90 disabled:opacity-50"
+                >
+                  {deleting ? "…" : "Delete"}
+                </button>
+                <button
+                  onClick={() => setConfirmingId(null)}
+                  disabled={deleting}
+                  className="px-2.5 py-1 rounded-full text-xs font-semibold border border-slate-300 text-slate"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3 shrink-0">
+                <span className="font-mono text-sm font-semibold text-coral">-₹{e.amount.toFixed(0)}</span>
+                <button
+                  onClick={() => setConfirmingId(e.id)}
+                  className="opacity-0 group-hover:opacity-100 text-[10px] text-coral hover:underline transition-opacity"
+                >
+                  Delete
+                </button>
+                <button onClick={() => onEdit(e)} className="text-slate hover:text-emerald transition-colors">
+                  <ArrowRight size={16} />
+                </button>
+              </div>
+            )}
           </li>
-        )
-      )}
+        );
+      })}
     </ul>
   );
 }

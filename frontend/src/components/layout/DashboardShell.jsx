@@ -2,6 +2,8 @@ import { NavLink, useNavigate, Outlet } from "react-router-dom";
 import { LayoutDashboard, Receipt, Wallet, PiggyBank, LogOut, Landmark, Target } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import NotificationBell from "../notifications/NotificationBell";
+import { Bell } from "lucide-react"; 
+import { BarChart3 } from "lucide-react";
 
 const NAV_ITEMS = [
   { to: "/dashboard", label: "Overview", end: true, icon: LayoutDashboard },
@@ -10,6 +12,8 @@ const NAV_ITEMS = [
   { to: "/dashboard/income", label: "Income", icon: Wallet },
   { to: "/dashboard/budgets", label: "Budgets", icon: PiggyBank },
   { to: "/dashboard/goals", label: "Goals", icon: Target },
+  { to: "/dashboard/notifications", label: "Notifications", icon: Bell },
+  { to: "/dashboard/reports", label: "Reports", icon: BarChart3 },
 ];
 
 export default function DashboardShell({ children }) {
@@ -25,9 +29,19 @@ export default function DashboardShell({ children }) {
     <div className="min-h-screen flex bg-paper">
       <aside className="w-60 bg-ink flex flex-col justify-between py-8 px-5">
         <div>
-          <div className="flex items-baseline gap-1.5 mb-10 px-1">
-            <span className="font-display italic text-lg text-paper">Budget</span>
-            <span className="font-display text-lg text-paper">Buddy</span>
+          <div className="flex items-center gap-2.5 mb-10 px-1">
+            <div className="w-8 h-8 rounded-lg bg-emerald flex items-center justify-center shrink-0">
+              <Wallet size={16} className="text-white" strokeWidth={2.4} />
+            </div>
+            <div>
+              <div className="flex items-baseline gap-1.5">
+                <span className="font-display text-lg text-paper">Budget</span>
+                <span className="font-display text-lg text-paper">Buddy</span>
+              </div>
+              <p className="text-[10px] text-paper/40 font-mono tracking-wide -mt-0.5">
+                Plan · Save · Grow
+              </p>
+            </div>
           </div>
           <nav className="space-y-1">
             {NAV_ITEMS.map((item) => {
