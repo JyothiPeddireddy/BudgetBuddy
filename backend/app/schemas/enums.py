@@ -6,4 +6,6 @@ class ExpenseCategory(str, Enum):
     shopping = "Shopping"
     education = "Education"
     entertainment = "Entertainment"
+    bills = "Bills"
     miscellaneous = "Miscellaneous"
+    others = "Others"

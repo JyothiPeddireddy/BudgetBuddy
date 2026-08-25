@@ -1,6 +1,7 @@
 from decimal import Decimal
 from sqlalchemy.orm import Session
 from app.models.savings_goal import SavingsGoal
+from app.models.account import Account
 from app.schemas.savings_goal import SavingsGoalCreate, SavingsGoalUpdate
 
 def create_goal(db: Session, user_id: int, goal_in: SavingsGoalCreate) -> SavingsGoal:
@@ -31,8 +32,15 @@ def update_goal(db: Session, goal_id: int, user_id: int, goal_in: SavingsGoalUpd
     goal = get_goal(db, goal_id, user_id)
     if not goal:
         return None
-    for field, value in goal_in.model_dump(exclude_unset=True).items():
+
+    updates = goal_in.model_dump(exclude_unset=True)
+    for field, value in updates.items():
         setattr(goal, field, value)
+
+    # Auto-correct status if current/target amount changed
+    if "current_amount" in updates or "target_amount" in updates:
+        goal.status = "completed" if goal.current_amount >= goal.target_amount else "in_progress"
+
     db.commit()
     db.refresh(goal)
     return goal
@@ -45,15 +53,30 @@ def delete_goal(db: Session, goal_id: int, user_id: int) -> bool:
     db.commit()
     return True
 
-def contribute_to_goal(db: Session, goal_id: int, user_id: int, amount: float):
-    """Adds `amount` to current_amount. Returns (goal, previous_amount) or None if not found."""
+def contribute_to_goal(db: Session, goal_id: int, user_id: int, account_id: int, amount: float):
+    """
+    Deducts `amount` from the given account's balance and adds it to the goal's current_amount.
+    Returns "not_found", "invalid_account", "insufficient_funds", or (goal, previous_amount).
+    """
     goal = get_goal(db, goal_id, user_id)
     if not goal:
-        return None
+        return "not_found"
+
+    account = db.query(Account).filter(Account.id == account_id, Account.user_id == user_id).first()
+    if not account:
+        return "invalid_account"
+
+    contribution = Decimal(str(amount))
+    if account.balance < contribution:
+        return "insufficient_funds"
+
     previous_amount = goal.current_amount
-    goal.current_amount = goal.current_amount + Decimal(str(amount))
+    account.balance -= contribution
+    goal.current_amount = goal.current_amount + contribution
     if goal.current_amount >= goal.target_amount:
         goal.status = "completed"
+
     db.commit()
     db.refresh(goal)
+    db.refresh(account)
     return goal, previous_amount

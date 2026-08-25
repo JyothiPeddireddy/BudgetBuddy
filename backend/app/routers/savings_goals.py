@@ -46,12 +46,17 @@ def contribute(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user),
 ):
-    result = contribute_to_goal(db, goal_id, current_user.id, contribution.amount)
-    if not result:
+    result = contribute_to_goal(db, goal_id, current_user.id, contribution.account_id, contribution.amount)
+
+    if result == "not_found":
         raise HTTPException(status_code=404, detail="Savings goal not found")
+    if result == "invalid_account":
+        raise HTTPException(status_code=404, detail="Account not found")
+    if result == "insufficient_funds":
+        raise HTTPException(status_code=400, detail="Insufficient funds in the selected account")
+
     goal, previous_amount = result
 
-    # Step 7: goal milestone notifications
     target = float(goal.target_amount)
     prev_pct = (float(previous_amount) / target) * 100 if target else 0
     new_pct = (float(goal.current_amount) / target) * 100 if target else 0

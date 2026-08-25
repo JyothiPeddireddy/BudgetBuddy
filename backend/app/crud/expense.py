@@ -6,15 +6,20 @@ from app.schemas.expense import ExpenseCreate, ExpenseUpdate
 from sqlalchemy import extract, func
 
 def create_expense(db: Session, user_id: int, expense_in: ExpenseCreate):
+    """Returns 'account_not_found', 'insufficient_funds', or the created Expense."""
     account = db.query(Account).filter(
         Account.id == expense_in.account_id, Account.user_id == user_id
     ).first()
     if not account:
-        return None
+        return "account_not_found"
+
+    amount = Decimal(str(expense_in.amount))
+    if account.balance < amount:
+        return "insufficient_funds"
 
     expense = Expense(user_id=user_id, **expense_in.model_dump())
     db.add(expense)
-    account.balance -= Decimal(str(expense_in.amount))
+    account.balance -= amount
     db.commit()
     db.refresh(expense)
     return expense
@@ -56,8 +61,15 @@ def update_expense(db: Session, expense_id: int, user_id: int, expense_in: Expen
 
     old_account = db.query(Account).filter(Account.id == expense.account_id).first()
 
+    # Reverse the old deduction first, so the funds check below is accurate
     if old_account:
         old_account.balance += expense.amount
+
+    if new_account and new_account.balance < new_amount:
+        # Undo the reversal above before bailing out
+        if old_account:
+            old_account.balance -= expense.amount
+        return "insufficient_funds"
 
     if new_account:
         new_account.balance -= new_amount
@@ -79,7 +91,6 @@ def delete_expense(db: Session, expense_id: int, user_id: int) -> bool:
     db.delete(expense)
     db.commit()
     return True
-
 
 def get_total_spent_this_month(db: Session, user_id: int, category: str, year: int, month: int) -> float:
     total = (

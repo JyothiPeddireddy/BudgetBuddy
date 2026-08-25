@@ -23,24 +23,22 @@ router = APIRouter()
 @router.post("/", response_model=ExpenseOut)
 def add_expense(expense_in: ExpenseCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
     expense = create_expense(db, current_user.id, expense_in)
-    if not expense:
+
+    if expense == "account_not_found":
         raise HTTPException(status_code=404, detail="Account not found")
+    if expense == "insufficient_funds":
+        raise HTTPException(status_code=400, detail="Insufficient funds in the selected account")
 
     month_year = expense.date.strftime("%Y-%m")
     budget = get_budget_for_category(db, current_user.id, expense.category, month_year)
-    print(f"DEBUG: category={expense.category!r}, month_year={month_year!r}, budget_found={budget}")
     if budget:
         total_spent = get_total_spent_this_month(
             db, current_user.id, expense.category, expense.date.year, expense.date.month
         )
-        print(f"DEBUG: total_spent={total_spent}, limit={float(budget.monthly_limit)}")
         if total_spent > float(budget.monthly_limit):
-            print("DEBUG: threshold crossed, creating notification")
             message = f"You've exceeded your {expense.category} budget for {month_year}"
             if not budget_alert_exists(db, current_user.id, message):
                 create_notification(db, current_user.id, message, "budget_alert")
-            else:
-                print("DEBUG: alert already exists, skipping")
 
     return expense
 
@@ -143,6 +141,8 @@ def edit_expense(expense_id: int, expense_in: ExpenseUpdate, db: Session = Depen
         raise HTTPException(status_code=404, detail="Expense not found")
     if result == "invalid_account":
         raise HTTPException(status_code=404, detail="Account not found")
+    if result == "insufficient_funds":
+        raise HTTPException(status_code=400, detail="Insufficient funds in the selected account")
     return result
 
 @router.delete("/{expense_id}")

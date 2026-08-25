@@ -15,6 +15,7 @@ class AccountUpdate(BaseModel):
     account_name: Optional[str] = None
     bank_name: Optional[str] = None
     account_type: Optional[str] = None
+    balance: Optional[float] = Field(default=None, ge=0)
 
 class AccountOut(AccountBase):
     id: int

@@ -13,6 +13,7 @@ class SavingsGoal(Base):
     current_amount = Column(Numeric(12, 2), nullable=False, default=0)
     target_date = Column(Date, nullable=True)
     status = Column(String(20), nullable=False, default="in_progress")
+    icon = Column(String(30), nullable=False, default="laptop")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     __table_args__ = (

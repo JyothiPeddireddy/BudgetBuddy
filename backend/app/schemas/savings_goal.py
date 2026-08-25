@@ -11,6 +11,7 @@ class SavingsGoalBase(BaseModel):
     title: str
     target_amount: float = Field(gt=0)
     target_date: Optional[date_type] = None
+    icon: str = "laptop"
 
 class SavingsGoalCreate(SavingsGoalBase):
     pass
@@ -18,10 +19,13 @@ class SavingsGoalCreate(SavingsGoalBase):
 class SavingsGoalUpdate(BaseModel):
     title: Optional[str] = None
     target_amount: Optional[float] = Field(default=None, gt=0)
+    current_amount: Optional[float] = Field(default=None, ge=0)
     target_date: Optional[date_type] = None
     status: Optional[GoalStatus] = None
+    icon: Optional[str] = None
 
 class SavingsGoalContribute(BaseModel):
+    account_id: int
     amount: float = Field(gt=0)
 
 class SavingsGoalOut(BaseModel):
@@ -32,6 +36,7 @@ class SavingsGoalOut(BaseModel):
     current_amount: float
     target_date: Optional[date_type] = None
     status: GoalStatus
+    icon: str
     created_at: datetime
 
     class Config:

@@ -31,9 +31,30 @@ def mark_notification_read(db: Session, notification_id: int, user_id: int):
     db.refresh(notification)
     return notification
 
+def mark_all_read(db: Session, user_id: int) -> int:
+    updated = (
+        db.query(Notification)
+        .filter(Notification.user_id == user_id, Notification.is_read == False)
+        .update({"is_read": True})
+    )
+    db.commit()
+    return updated
+
 def budget_alert_exists(db: Session, user_id: int, message: str) -> bool:
     return (
         db.query(Notification)
         .filter(Notification.user_id == user_id, Notification.type == "budget_alert", Notification.message == message)
         .first() is not None
     )
+
+def delete_notification(db: Session, notification_id: int, user_id: int) -> bool:
+    notification = (
+        db.query(Notification)
+        .filter(Notification.id == notification_id, Notification.user_id == user_id)
+        .first()
+    )
+    if not notification:
+        return False
+    db.delete(notification)
+    db.commit()
+    return True
