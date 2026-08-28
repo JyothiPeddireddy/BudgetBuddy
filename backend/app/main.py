@@ -3,7 +3,7 @@ import logging
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from app.routers import auth, expenses, incomes, budgets, account, savings_goals, notifications
+from app.routers import auth, expenses, incomes, budgets, account, savings_goals, notifications, reports
 
 
 logging.basicConfig(level=logging.INFO)
@@ -18,14 +18,18 @@ app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(incomes.router, prefix="/incomes", tags=["Incomes"])
 app.include_router(expenses.router, prefix="/expenses", tags=["Expenses"])
 app.include_router(budgets.router, prefix="/budgets", tags=["Budgets"])
-app.include_router(account.router,prefix="/accounts",tags=["Accounts"])
+app.include_router(account.router, prefix="/accounts", tags=["Accounts"])
 app.include_router(savings_goals.router, prefix="/goals", tags=["Savings Goals"])
 app.include_router(notifications.router, prefix="/notifications", tags=["Notifications"])
+app.include_router(reports.router)
 
+# Include both localhost and 127.0.0.1 variants for dev — browsers treat
+# these as distinct origins even though they resolve to the same machine.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
+        "http://127.0.0.1:5173",
     ],
     allow_credentials=True,
     allow_methods=["*"],

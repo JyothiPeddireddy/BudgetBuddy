@@ -174,7 +174,7 @@ export default function SavingsGoalDetail({ goal, onBack, onChanged }) {
             {accounts.length === 0 && <option value="">No accounts — add one first</option>}
             {accounts.map((a) => (
               <option key={a.id} value={a.id}>
-                {a.account_name} — ₹{a.balance.toFixed(2)} available
+                {a.bank_name || a.account_name} — ₹{a.balance.toFixed(2)} available
               </option>
             ))}
           </select>

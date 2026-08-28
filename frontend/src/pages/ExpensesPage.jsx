@@ -89,7 +89,10 @@ export default function ExpensesPage() {
     return { label: category, value, color: meta.color };
   });
 
-  const recentExpenses = [...filtered].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 4);
+  // Show every filtered expense (sorted, most recent first) — no cap.
+  // A scrollable wrapper around <ExpenseList> below keeps the card from
+  // growing unbounded when there are many transactions in a period.
+  const recentExpenses = [...filtered].sort((a, b) => new Date(b.date) - new Date(a.date));
 
   return (
     <div className="max-w-6xl mx-auto px-8 py-10 space-y-6">
@@ -171,7 +174,9 @@ export default function ExpensesPage() {
       <div className="flex gap-5 items-start flex-wrap">
         <div className="card p-6 flex-1 min-w-[320px]">
           <h2 className="font-display text-lg text-ink mb-4">Recent Expenses</h2>
-          <ExpenseList expenses={recentExpenses} onDeleted={handleDeleted} onEdit={openEdit} />
+          <div className="max-h-[420px] overflow-y-auto pr-1">
+            <ExpenseList expenses={recentExpenses} onDeleted={handleDeleted} onEdit={openEdit} />
+          </div>
         </div>
 
         <div className="card p-6 w-fit">

@@ -15,7 +15,7 @@ import BudgetsPage from "./pages/BudgetsPage";
 import AccountsPage from "./pages/AccountsPage";
 import SavingsGoalsPage from "./pages/SavingsGoalsPage";
 import NotificationsPage from "./pages/NotificationsPage";
-import ReportsPage from "./pages/ReportsPage";
+import ReportsPage from "./pages/Reports";
 
 
 

@@ -1,7 +1,8 @@
-import { TrendingDown, PiggyBank, Trophy, FileText, Bell } from "lucide-react";
+import { TrendingDown, PiggyBank, Trophy, FileText, Bell, AlertTriangle } from "lucide-react";
 
 export const NOTIFICATION_META = {
   budget_alert: { icon: TrendingDown, bg: "bg-coral-soft", text: "text-coral", tab: "alerts" },
+  budget_warning: { icon: AlertTriangle, bg: "bg-orange-100", text: "text-orange-600", tab: "alerts" },
   savings_reminder: { icon: PiggyBank, bg: "bg-purple-100", text: "text-purple-600", tab: "reminders" },
   goal_milestone: { icon: Trophy, bg: "bg-orange-100", text: "text-orange-600", tab: "updates" },
   monthly_report: { icon: FileText, bg: "bg-sky-100", text: "text-sky-600", tab: "updates" },

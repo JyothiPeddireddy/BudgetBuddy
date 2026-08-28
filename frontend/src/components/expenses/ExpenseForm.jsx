@@ -93,7 +93,7 @@ export default function ExpenseForm({ onAdded, editingExpense, onUpdated, onCanc
         <select value={accountId} onChange={(e) => setAccountId(e.target.value)} className="field" required>
           {accounts.length === 0 && <option value="">No accounts — add one first</option>}
           {accounts.map((a) => (
-            <option key={a.id} value={a.id}>{a.account_name}</option>
+            <option key={a.id} value={a.id}>{a.bank_name || a.account_name}</option>
           ))}
         </select>
         <input

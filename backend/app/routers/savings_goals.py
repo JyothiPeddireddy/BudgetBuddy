@@ -61,9 +61,15 @@ def contribute(
     prev_pct = (float(previous_amount) / target) * 100 if target else 0
     new_pct = (float(goal.current_amount) / target) * 100 if target else 0
 
-    if prev_pct < 100 <= new_pct:
-        create_notification(db, current_user.id, f"You completed your savings goal '{goal.title}'!", "goal_milestone")
-    elif prev_pct < 50 <= new_pct:
-        create_notification(db, current_user.id, f"You're halfway to your savings goal '{goal.title}'!", "goal_milestone")
+    milestones = [
+        (100, f"You completed your savings goal '{goal.title}'!"),
+        (75, f"You're 75% of the way to your savings goal '{goal.title}'!"),
+        (50, f"You're halfway to your savings goal '{goal.title}'!"),
+        (25, f"You're 25% of the way to your savings goal '{goal.title}'!"),
+    ]
+    for threshold, message in milestones:
+        if prev_pct < threshold <= new_pct:
+            create_notification(db, current_user.id, message, "goal_milestone")
+            break  # only fire the highest threshold actually crossed this time
 
     return goal
