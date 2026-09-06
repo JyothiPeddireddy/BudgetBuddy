@@ -45,6 +45,16 @@ export default function IncomeForm({ onAdded, editingIncome, onUpdated, onCancel
       return;
     }
 
+    // Description/Notes is now mandatory -- guard client-side too, since
+    // the input's `required` attribute alone won't stop a programmatic
+    // submit. Requiring a short note makes each income entry easier to
+    // identify later (e.g. "Freelance - Logo design for Acme Corp"
+    // instead of just "Freelance").
+    if (!notes.trim()) {
+      setError("Description is required.");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const payload = {
@@ -52,7 +62,7 @@ export default function IncomeForm({ onAdded, editingIncome, onUpdated, onCancel
         source,
         amount: parseFloat(amount),
         date,
-        notes,
+        notes: notes.trim(),
       };
 
       if (isEditing) {
@@ -98,8 +108,8 @@ export default function IncomeForm({ onAdded, editingIncome, onUpdated, onCancel
         />
       </div>
       <input
-        type="text" value={notes} onChange={(e) => setNotes(e.target.value)}
-        placeholder="Notes (optional)" className="field"
+        type="text" required value={notes} onChange={(e) => setNotes(e.target.value)}
+        placeholder="Description (e.g. Freelance project - logo design)" className="field"
       />
       {error && <p className="text-sm text-coral">{error}</p>}
       <div className="flex gap-3">

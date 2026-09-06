@@ -15,8 +15,10 @@ import BudgetsPage from "./pages/BudgetsPage";
 import AccountsPage from "./pages/AccountsPage";
 import SavingsGoalsPage from "./pages/SavingsGoalsPage";
 import NotificationsPage from "./pages/NotificationsPage";
-import ReportsPage from "./pages/Reports";
-
+import Reports from "./pages/Reports";
+import AnalyticsPage from "./pages/AnalyticsPage";
+import ProfilePage from "./pages/ProfilePage";
+import SystemAnalytics from "./pages/SystemAnalytics";
 
 
 export default function App() {
@@ -46,7 +48,10 @@ export default function App() {
               <Route path="budgets" element={<BudgetsPage />} />
               <Route path="goals" element={<SavingsGoalsPage />} />
               <Route path="notifications" element={<NotificationsPage />} />
-              <Route path="reports" element={<ReportsPage />} />
+              <Route path="reports" element={<Reports />} />
+              <Route path="analytics" element={<AnalyticsPage />} />
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="system-analytics" element={<SystemAnalytics />} />
             </Route>
           </Routes>
         </AuthProvider>

@@ -1,18 +1,21 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Clock, Calendar, CalendarDays, Pencil } from "lucide-react";
-import { contributeToGoal } from "../../api/goals";
+import { ArrowLeft, Clock, Calendar, CalendarDays, Pencil, Trash2 } from "lucide-react";
+import { contributeToGoal, deleteGoal } from "../../api/goals";
 import { getAccounts } from "../../api/accounts";
 import { getGoalIcon } from "./goalIcons";
 import RadialProgress from "../charts/RadialProgress";
 import SavingsGoalEditForm from "./SavingsGoalEditForm";
 
-export default function SavingsGoalDetail({ goal, onBack, onChanged }) {
+export default function SavingsGoalDetail({ goal, onBack, onChanged, onDeleted }) {
   const [accounts, setAccounts] = useState([]);
   const [accountId, setAccountId] = useState("");
   const [amount, setAmount] = useState("");
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState("");
   const [editing, setEditing] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   useEffect(() => {
     getAccounts().then((res) => {
@@ -48,6 +51,18 @@ export default function SavingsGoalDetail({ goal, onBack, onChanged }) {
     }
   };
 
+  const handleDelete = async () => {
+    setDeleteError("");
+    setDeleting(true);
+    try {
+      await deleteGoal(goal.id);
+      onDeleted?.();
+    } catch (err) {
+      setDeleteError(err.response?.data?.detail || "Could not delete goal.");
+      setDeleting(false);
+    }
+  };
+
   if (editing) {
     return (
       <div>
@@ -60,6 +75,56 @@ export default function SavingsGoalDetail({ goal, onBack, onChanged }) {
           onSaved={() => { setEditing(false); onChanged(); }}
           onCancel={() => setEditing(false)}
         />
+      </div>
+    );
+  }
+
+  // Delete confirmation screen — shown instead of the normal detail view
+  // when the user clicks the trash icon, on either the active or
+  // completed-goal view.
+  if (confirmingDelete) {
+    return (
+      <div>
+        <button
+          onClick={() => setConfirmingDelete(false)}
+          className="flex items-center gap-2 text-slate hover:text-ink text-sm mb-6"
+        >
+          <ArrowLeft size={16} /> Back to goal
+        </button>
+
+        <div className="text-center py-4">
+          <div className="w-14 h-14 rounded-full bg-coral-soft flex items-center justify-center mx-auto mb-4">
+            <Trash2 size={22} className="text-coral" />
+          </div>
+          <h2 className="font-display text-lg text-ink mb-2">Delete "{goal.title}"?</h2>
+          <p className="text-sm text-slate mb-1">
+            This permanently removes the goal and its saved progress.
+          </p>
+          <p className="text-sm text-slate mb-6">
+            It does <strong>not</strong> move or refund any money already contributed.
+          </p>
+
+          {deleteError && <p className="text-sm text-coral mb-4">{deleteError}</p>}
+
+          <div className="flex items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => setConfirmingDelete(false)}
+              disabled={deleting}
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold border border-slate-200 text-slate hover:text-ink transition-colors disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={deleting}
+              className="px-6 py-2.5 rounded-xl text-sm font-semibold bg-coral text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+            >
+              {deleting ? "Deleting…" : "Delete Goal"}
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -100,6 +165,12 @@ export default function SavingsGoalDetail({ goal, onBack, onChanged }) {
             Edit
           </button>
           <button
+            onClick={() => setConfirmingDelete(true)}
+            className="border border-coral text-coral px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-coral-soft transition-colors"
+          >
+            Delete
+          </button>
+          <button
             onClick={onBack}
             className="border border-emerald text-emerald px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-emerald-soft transition-colors"
           >
@@ -116,9 +187,14 @@ export default function SavingsGoalDetail({ goal, onBack, onChanged }) {
         <button onClick={onBack} className="flex items-center gap-2 text-slate hover:text-ink text-sm">
           <ArrowLeft size={16} /> Back to goals
         </button>
-        <button onClick={() => setEditing(true)} className="text-slate hover:text-emerald transition-colors">
-          <Pencil size={16} />
-        </button>
+        <div className="flex items-center gap-3">
+          <button onClick={() => setEditing(true)} className="text-slate hover:text-emerald transition-colors">
+            <Pencil size={16} />
+          </button>
+          <button onClick={() => setConfirmingDelete(true)} className="text-slate hover:text-coral transition-colors">
+            <Trash2 size={16} />
+          </button>
+        </div>
       </div>
 
       <h2 className="font-display text-lg text-ink mb-6">{goal.title}</h2>

@@ -36,10 +36,35 @@ export default function AccountForm({ onAdded, onUpdated, editingAccount, onCanc
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    // Bank Name is now mandatory -- guard client-side too, since the
+    // input's `required` attribute alone won't stop a programmatic
+    // submit (e.g. pressing Enter in another field in some browsers).
+    if (!bankName.trim()) {
+      setError("Bank name is required.");
+      return;
+    }
+
+
+    // Initial Balance cannot be negative -- mirrors the backend's ge=0
+    // check, but catches it client-side first for a faster, friendlier
+    // error instead of round-tripping to the server for something this
+    // obviously invalid.
+    const parsedBalance = parseFloat(balance);
+    if (Number.isNaN(parsedBalance)) {
+      setError("Please enter a valid amount.");
+      return;
+    }
+    if (parsedBalance < 0) {
+      setError("Initial balance cannot be negative.");
+      return;
+    }
+
+
     setSubmitting(true);
     const payload = {
       account_name: accountName,
-      bank_name: bankName || null,
+      bank_name: bankName.trim(), // <-- CHANGED: no longer falls back to null
       account_type: accountType,
       balance: parseFloat(balance) || 0,
     };
@@ -62,7 +87,7 @@ export default function AccountForm({ onAdded, onUpdated, editingAccount, onCanc
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-xs font-semibold text-slate mb-1.5">Bank</label>
+        <label className="block text-xs font-semibold text-slate mb-1.5">Account Type</label>
         <select value={accountType} onChange={(e) => setAccountType(e.target.value)} className="field">
           {TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
         </select>
@@ -76,9 +101,9 @@ export default function AccountForm({ onAdded, onUpdated, editingAccount, onCanc
         />
       </div>
       <div>
-        <label className="block text-xs font-semibold text-slate mb-1.5">Bank Name (optional)</label>
+        <label className="block text-xs font-semibold text-slate mb-1.5">Bank Name</label>
         <input
-          type="text" value={bankName}
+          type="text" required value={bankName}
           onChange={(e) => setBankName(e.target.value)}
           placeholder="Enter bank name" className="field"
         />

@@ -2,19 +2,33 @@ import { useState } from "react";
 import { updateGoal } from "../../api/goals";
 
 export default function SavingsGoalEditForm({ goal, onSaved, onCancel }) {
+  const [title, setTitle] = useState(goal.title || "");
   const [targetAmount, setTargetAmount] = useState(String(goal.target_amount));
   const [currentAmount, setCurrentAmount] = useState(String(goal.current_amount));
+  const [targetDate, setTargetDate] = useState(goal.target_date || "");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (!title.trim()) {
+      setError("Goal name is required.");
+      return;
+    }
+    if (!targetDate) {
+      setError("Target date is required.");
+      return;
+    }
+
     setSaving(true);
     try {
       await updateGoal(goal.id, {
+        title: title.trim(),
         target_amount: parseFloat(targetAmount),
         current_amount: parseFloat(currentAmount),
+        target_date: targetDate,
       });
       onSaved();
     } catch (err) {
@@ -29,6 +43,17 @@ export default function SavingsGoalEditForm({ goal, onSaved, onCancel }) {
       <p className="text-xs text-slate bg-slate-50 rounded-lg p-3">
         This corrects the numbers directly — it does <strong>not</strong> move money to or from any account.
       </p>
+
+      <div>
+        <label className="block text-xs font-semibold text-slate mb-1.5">Goal Name</label>
+        <input
+          type="text" required value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="e.g. New Laptop"
+          className="field"
+        />
+      </div>
+
       <div>
         <label className="block text-xs font-semibold text-slate mb-1.5">Target Amount</label>
         <input
@@ -37,6 +62,7 @@ export default function SavingsGoalEditForm({ goal, onSaved, onCancel }) {
           className="field"
         />
       </div>
+
       <div>
         <label className="block text-xs font-semibold text-slate mb-1.5">Current Amount Saved</label>
         <input
@@ -45,7 +71,18 @@ export default function SavingsGoalEditForm({ goal, onSaved, onCancel }) {
           className="field"
         />
       </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-slate mb-1.5">Target Date</label>
+        <input
+          type="date" required value={targetDate}
+          onChange={(e) => setTargetDate(e.target.value)}
+          className="field"
+        />
+      </div>
+
       {error && <p className="text-sm text-coral">{error}</p>}
+
       <div className="flex gap-3">
         <button
           type="button" onClick={onCancel}

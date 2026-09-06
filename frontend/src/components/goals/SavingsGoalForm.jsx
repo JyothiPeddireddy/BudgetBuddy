@@ -14,12 +14,18 @@ export default function SavingsGoalForm({ onAdded, onCancel }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (!targetDate) {
+      setError("Target date is required.");
+      return;
+    }
+
     setSubmitting(true);
     try {
       await addGoal({
         title,
         target_amount: parseFloat(targetAmount),
-        target_date: targetDate || null,
+        target_date: targetDate,
         icon,
       });
       setTitle("");
@@ -67,7 +73,7 @@ export default function SavingsGoalForm({ onAdded, onCancel }) {
         <div>
           <label className="block text-xs font-semibold text-slate mb-1.5">Target Date</label>
           <input
-            type="date" value={targetDate}
+            type="date" required value={targetDate}
             onChange={(e) => setTargetDate(e.target.value)}
             className="field"
           />

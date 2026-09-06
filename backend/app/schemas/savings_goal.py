@@ -10,7 +10,7 @@ class GoalStatus(str, Enum):
 class SavingsGoalBase(BaseModel):
     title: str
     target_amount: float = Field(gt=0)
-    target_date: Optional[date_type] = None
+    target_date: date_type  # <-- CHANGED: mandatory now (was Optional[date_type] = None)
     icon: str = "laptop"
 
 class SavingsGoalCreate(SavingsGoalBase):
@@ -20,7 +20,7 @@ class SavingsGoalUpdate(BaseModel):
     title: Optional[str] = None
     target_amount: Optional[float] = Field(default=None, gt=0)
     current_amount: Optional[float] = Field(default=None, ge=0)
-    target_date: Optional[date_type] = None
+    target_date: Optional[date_type] = None  # stays optional -- partial update semantics
     status: Optional[GoalStatus] = None
     icon: Optional[str] = None
 

@@ -3,7 +3,7 @@ import logging
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from app.routers import auth, expenses, incomes, budgets, account, savings_goals, notifications, reports
+from app.routers import auth, expenses, incomes, budgets, account, savings_goals, notifications, reports, analytics, profile, admin, subscription
 
 
 logging.basicConfig(level=logging.INFO)
@@ -22,6 +22,10 @@ app.include_router(account.router, prefix="/accounts", tags=["Accounts"])
 app.include_router(savings_goals.router, prefix="/goals", tags=["Savings Goals"])
 app.include_router(notifications.router, prefix="/notifications", tags=["Notifications"])
 app.include_router(reports.router)
+app.include_router(analytics.router)
+app.include_router(profile.router)
+app.include_router(admin.router, tags=["Admin"])
+app.include_router(subscription.router, tags=["Subscription"])
 
 # Include both localhost and 127.0.0.1 variants for dev — browsers treat
 # these as distinct origins even though they resolve to the same machine.

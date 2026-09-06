@@ -20,6 +20,8 @@ const CATEGORIES = [
   "Education",
   "Entertainment",
   "Miscellaneous",
+  "Bills", 
+  "Others"
 ];
 
 const MONTHS = [

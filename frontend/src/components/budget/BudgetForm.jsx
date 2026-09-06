@@ -7,7 +7,7 @@ const CATEGORIES = [
   "Shopping",
   "Education",
   "Entertainment",
-  "Miscellaneous",
+  "Miscellaneous"
 ];
 
 export default function BudgetForm({ onAdded, onUpdated, editingBudget, onCancelEdit }) {

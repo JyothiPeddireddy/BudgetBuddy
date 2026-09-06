@@ -19,6 +19,7 @@ import {
   Film,
   Package,
   Banknote,
+  Scale,
 } from "lucide-react";
 import { getDashboard, getBudgets } from "../api/transactions";
 import { getAccounts } from "../api/accounts";
@@ -26,6 +27,7 @@ import { getGoals } from "../api/goals";
 import { getGoalIcon } from "../components/goals/goalIcons";
 import { useAuth } from "../context/AuthContext";
 import DonutChart from "../components/charts/DonutChart";
+import PieChart from "../components/charts/PieChart";
 import RadialProgress from "../components/charts/RadialProgress";
 
 const MONTHS = [
@@ -223,7 +225,7 @@ export default function Dashboard() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
         {/* Spending Overview */}
         <div className="card p-5">
@@ -287,6 +289,61 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+
+        {/* Income vs Expenses — true pie chart split */}
+        <div className="card p-5">
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="flex items-center gap-2 font-display text-base text-ink">
+              <Scale size={15} className="text-indigo" />
+              Income vs Expenses
+            </h2>
+            <Link
+              to="/dashboard/analytics"
+              className="text-xs text-emerald font-semibold hover:underline shrink-0"
+            >
+              View Full Analytics →
+            </Link>
+          </div>
+          <p className="text-xs text-slate mb-3">{eyebrowLabel}</p>
+
+          {data.total_income > 0 || data.total_expenses > 0 ? (
+            <div className="flex flex-col items-center">
+              <PieChart
+                data={[
+                  { label: "Income", value: data.total_income, color: "#10b981" },
+                  { label: "Expenses", value: data.total_expenses, color: "#f43f5e" },
+                ]}
+                size={145}
+              />
+              <div className="flex items-center gap-4 mt-3">
+                <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald inline-block" />
+                  Income ₹{data.total_income.toFixed(0)}
+                </span>
+                <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate">
+                  <span className="w-2.5 h-2.5 rounded-full bg-coral inline-block" />
+                  Expenses ₹{data.total_expenses.toFixed(0)}
+                </span>
+              </div>
+              <p className="text-xs font-semibold mt-2 text-center">
+                {data.total_income >= data.total_expenses ? (
+                  <span className="text-emerald">
+                    ₹{(data.total_income - data.total_expenses).toFixed(0)} net positive
+                  </span>
+                ) : (
+                  <span className="text-coral">
+                    ₹{(data.total_expenses - data.total_income).toFixed(0)} net negative
+                  </span>
+                )}
+              </p>
+            </div>
+          ) : (
+            <div className="h-24 flex items-center justify-center">
+              <p className="text-sm text-slate">No activity recorded for this period.</p>
+            </div>
+          )}
+        </div>
+
       </div>
 
       {/* Bottom Section */}
@@ -300,7 +357,7 @@ export default function Dashboard() {
             </h2>
 
             <Link
-              to="/dashboard/expenses"
+              to="/dashboard/reports"
               className="text-xs text-emerald font-semibold hover:underline"
             >
               View all →

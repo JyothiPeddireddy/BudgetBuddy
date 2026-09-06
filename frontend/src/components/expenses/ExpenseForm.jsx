@@ -58,13 +58,22 @@ export default function ExpenseForm({ onAdded, editingExpense, onUpdated, onCanc
       return;
     }
 
+    // Description is now mandatory -- guard client-side too, since the
+    // input's `required` attribute alone won't stop a programmatic submit.
+    // Requiring a short description makes each expense easier to identify
+    // later (e.g. "Groceries - weekly shop" instead of just "Food").
+    if (!description.trim()) {
+      setError("Description is required.");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const payload = {
         account_id: Number(accountId),
         category,
         amount: parseFloat(amount),
-        description,
+        description: description.trim(),
         date,
       };
 
@@ -108,8 +117,8 @@ export default function ExpenseForm({ onAdded, editingExpense, onUpdated, onCanc
         />
       </div>
       <input
-        type="text" value={description} onChange={(e) => setDescription(e.target.value)}
-        placeholder="Description (optional)" className="field"
+        type="text" required value={description} onChange={(e) => setDescription(e.target.value)}
+        placeholder="Description (e.g. Groceries - weekly shop)" className="field"
       />
       {error && <p className="text-sm text-coral">{error}</p>}
       <div className="flex gap-3">

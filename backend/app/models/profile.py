@@ -8,6 +8,7 @@ class Profile(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), unique=True)
     full_name = Column(String)
+    phone_number = Column(String(20), nullable=True)
     monthly_income = Column(Float, default=0.0)
     financial_preferences = Column(String, nullable=True)
 
