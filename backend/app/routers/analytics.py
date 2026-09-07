@@ -34,7 +34,7 @@ from app.core.permissions import (
     require_export_access,
     has_min_role,
     UserRole,
-)  # <-- NEW
+)
 
 from app.routers.reports import get_month_data, get_accounts_data
 
