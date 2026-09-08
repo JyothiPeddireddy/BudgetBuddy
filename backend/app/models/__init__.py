@@ -6,3 +6,4 @@ from app.models.budget import Budget
 from app.models.account import Account
 from app.models.savings_goal import SavingsGoal
 from app.models.notification import Notification
+from app.models.goal_contribution import GoalContribution
