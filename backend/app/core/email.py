@@ -14,14 +14,14 @@ def _send_email(to_email: str, subject: str, body: str):
     msg["To"] = to_email
     msg.attach(MIMEText(body, "html"))
 
-    # with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-        # server.starttls()
-        # server.login(SMTP_USERNAME, SMTP_PASSWORD)
-        # server.sendmail(FROM_EMAIL, to_email, msg.as_string())
-
-    with smtplib.SMTP_SSL(SMTP_HOST, 465) as server:
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+        server.starttls()
         server.login(SMTP_USERNAME, SMTP_PASSWORD)
         server.sendmail(FROM_EMAIL, to_email, msg.as_string())
+
+    # with smtplib.SMTP_SSL(SMTP_HOST, 465) as server:
+    #     server.login(SMTP_USERNAME, SMTP_PASSWORD)
+    #     server.sendmail(FROM_EMAIL, to_email, msg.as_string())
 
 def send_verification_email(to_email: str, token: str):
     verify_link = f"{FRONTEND_URL}/verify-email?token={token}"
