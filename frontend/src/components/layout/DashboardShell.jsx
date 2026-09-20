@@ -21,6 +21,14 @@ import { useAuth } from "../../context/AuthContext";
 import NotificationBell from "../notifications/NotificationBell";
 import useMediaQuery from "../../hooks/useMediaQuery";
 
+/**
+ * Keep this in sync with --breakpoint-dt in index.css.
+ * 900px is deliberately BELOW the ~980px layout viewport that mobile
+ * browsers use for "Desktop site", so a phone in desktop mode gets the
+ * real sidebar instead of the hamburger drawer.
+ */
+const DESKTOP_QUERY = "(min-width: 900px)";
+
 const BASE_NAV_ITEMS = [
   { to: "/dashboard", label: "Dashboard", end: true, icon: LayoutDashboard },
   { to: "/dashboard/accounts", label: "Accounts", icon: Landmark },
@@ -57,7 +65,7 @@ export default function DashboardShell() {
   const navigate = useNavigate();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const isDesktop = useMediaQuery(DESKTOP_QUERY);
 
   const handleLogout = () => {
     logout();
@@ -77,39 +85,39 @@ export default function DashboardShell() {
     };
   }, [mobileMenuOpen]);
 
-  // If the window is resized to laptop width, close the drawer
+  // If the window grows past the desktop breakpoint, close the drawer
   useEffect(() => {
     if (isDesktop) setMobileMenuOpen(false);
   }, [isDesktop]);
 
   return (
     <div className="min-h-screen flex bg-paper overflow-x-clip">
-      {/* Mobile overlay */}
-      {mobileMenuOpen && (
+      {/* Mobile overlay — only while the drawer is open below dt */}
+      {mobileMenuOpen && !isDesktop && (
         <button
           type="button"
           aria-label="Close menu"
           onClick={closeMobileMenu}
-          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/40 dt:hidden"
         />
       )}
 
-      {/* Sidebar (slide-in drawer on phone/tablet, fixed column on laptop) */}
+      {/* Sidebar (slide-in drawer below dt, fixed column at dt and above) */}
       <aside
         className={`
           fixed inset-y-0 left-0 z-50
-          w-64 max-w-[85vw] lg:w-60 bg-ink
+          w-64 max-w-[85vw] dt:w-60 bg-ink
           flex flex-col justify-between gap-6
-          py-6 lg:py-8 px-5
+          py-6 dt:py-8 px-5
           overflow-y-auto
           transform transition-transform duration-300 ease-in-out
-          lg:static lg:z-auto lg:translate-x-0
+          dt:static dt:z-auto dt:translate-x-0 dt:shrink-0
           ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
         <div>
           {/* Logo */}
-          <div className="flex items-center justify-between mb-8 lg:mb-10 px-1">
+          <div className="flex items-center justify-between mb-8 dt:mb-10 px-1">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-emerald flex items-center justify-center shrink-0">
                 <Wallet size={16} className="text-white" strokeWidth={2.4} />
@@ -127,11 +135,11 @@ export default function DashboardShell() {
               </div>
             </div>
 
-            {/* Close button - phone/tablet only */}
+            {/* Close button — drawer only */}
             <button
               type="button"
               onClick={closeMobileMenu}
-              className="lg:hidden p-1 text-paper/70 hover:text-paper"
+              className="dt:hidden p-1 text-paper/70 hover:text-paper"
               aria-label="Close navigation"
             >
               <X size={22} />
@@ -191,20 +199,20 @@ export default function DashboardShell() {
           NOTE: no "overflow-y-auto" here any more — it stopped the mobile
           top bar from staying pinned while scrolling. */}
       <main className="flex-1 min-w-0">
-        {/* Top bar: pinned to the top on phones so the menu button is always reachable */}
-        <div className="sticky top-0 z-30 bg-paper border-b border-slate-100 lg:border-0 lg:static flex items-center justify-between gap-3 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:pt-6 lg:pb-0">
-          {/* Mobile menu button */}
+        {/* Top bar: pinned below dt so the menu button is always reachable */}
+        <div className="sticky top-0 z-30 bg-paper border-b border-slate-100 dt:border-0 dt:static flex items-center justify-between gap-3 px-4 sm:px-6 dt:px-8 py-3 sm:py-4 dt:pt-6 dt:pb-0">
+          {/* Drawer menu button */}
           <button
             type="button"
             onClick={() => setMobileMenuOpen(true)}
-            className="lg:hidden w-10 h-10 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-ink hover:border-emerald transition-colors"
+            className="dt:hidden w-10 h-10 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-ink hover:border-emerald transition-colors"
             aria-label="Open navigation"
           >
             <Menu size={21} />
           </button>
 
-          {/* Laptop spacer */}
-          <div className="hidden lg:block" />
+          {/* Desktop spacer */}
+          <div className="hidden dt:block" />
 
           <div className="flex items-center gap-2 sm:gap-3">
             <NotificationBell />

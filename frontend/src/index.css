@@ -23,6 +23,21 @@
   --font-display: "Poppins", "Inter", sans-serif;
   --font-body: "Inter", sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
+
+  /* ------------------------------------------------------------
+     DESKTOP LAYOUT BREAKPOINT
+
+     Use `dt:` (not `lg:`) for anything that switches between the
+     mobile drawer layout and the fixed-sidebar layout.
+
+     Why 900px and not Tailwind's lg (1024px):
+     when Chrome/Safari on a phone is switched to "Desktop site",
+     the layout viewport becomes roughly 980px — NOT the width of a
+     real laptop. Anything gated behind 1024px therefore stays in
+     mobile mode on a phone in desktop mode, which is why the
+     hamburger kept showing. 900px sits safely below 980px.
+  ------------------------------------------------------------ */
+  --breakpoint-dt: 900px;
 }
 
 * {
@@ -294,8 +309,8 @@ a {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Tablets and below */
-@media (max-width: 1024px) {
+/* Below the desktop layout breakpoint (matches --breakpoint-dt) */
+@media (max-width: 899.98px) {
   /* Wide tables (reports, transactions) scroll sideways inside
      their own box instead of breaking the whole page.
      Wrap a table like: <div className="table-scroll"><table>…</table></div> */
