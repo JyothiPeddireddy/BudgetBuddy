@@ -8,7 +8,7 @@ const CATEGORIES = [
   "Education",
   "Entertainment",
   "Bills",
-  "Others"
+  "Others",
 ];
 
 export default function BudgetForm({ onAdded, onUpdated, editingBudget, onCancelEdit }) {
@@ -65,7 +65,8 @@ export default function BudgetForm({ onAdded, onUpdated, editingBudget, onCancel
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-3 gap-3">
+      {/* 1 column on phones, 2 columns from tablet up (was a cramped 3 columns) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
@@ -83,6 +84,7 @@ export default function BudgetForm({ onAdded, onUpdated, editingBudget, onCancel
           step="0.01"
           min="0.01"
           required
+          inputMode="decimal"
           value={monthlyLimit}
           onChange={(e) => setMonthlyLimit(e.target.value)}
           placeholder="Monthly limit"
@@ -94,17 +96,18 @@ export default function BudgetForm({ onAdded, onUpdated, editingBudget, onCancel
           required
           value={monthYear}
           onChange={(e) => setMonthYear(e.target.value)}
-          className="field"
+          className="field sm:col-span-2"
         />
       </div>
 
-      {error && <p className="text-sm text-indigo">{error}</p>}
+      {/* was text-indigo (which is teal in your theme) — errors now use the red "coral" like the other forms */}
+      {error && <p className="text-sm text-coral">{error}</p>}
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-3">
         <button
           type="submit"
           disabled={submitting}
-          className="bg-[#2DD4BF] text-slate-900 font-semibold px-5 py-2.5 rounded-xl hover:bg-[#14B8A6] transition-all disabled:opacity-50"
+          className="w-full sm:w-auto bg-[#2DD4BF] text-slate-900 font-semibold px-5 py-3 sm:py-2.5 rounded-xl hover:bg-[#14B8A6] transition-all disabled:opacity-50"
         >
           {submitting ? (isEditing ? "Updating…" : "Saving…") : (isEditing ? "Update budget" : "Set budget")}
         </button>
@@ -112,7 +115,7 @@ export default function BudgetForm({ onAdded, onUpdated, editingBudget, onCancel
           <button
             type="button"
             onClick={onCancelEdit}
-            className="text-sm text-slate hover:text-ink"
+            className="w-full sm:w-auto py-3 sm:py-0 text-sm text-slate hover:text-ink border border-slate-200 rounded-xl sm:border-0"
           >
             Cancel
           </button>

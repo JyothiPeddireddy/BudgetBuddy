@@ -1,8 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import {
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   Wallet,
   TrendingDown,
   Wallet2,
@@ -17,21 +15,23 @@ import {
 } from "lucide-react";
 
 import api from "../api/axios";
-import { useAuth } from "../context/AuthContext"; // <-- NEW
+import { useAuth } from "../context/AuthContext";
 import {
   getAnalyticsSummary,
   getSpendingByCategory,
   getMonthlyTrend,
   getSavingsProgress,
-  getCategoryTrend, // <-- NEW (step 2)
+  getCategoryTrend,
 } from "../api/analytics";
 import { getAccounts } from "../api/accounts";
 
 import SpendingPieChart from "../components/charts/SpendingPieChart";
 import GroupedBarChart from "../components/charts/GroupedBarChart";
-import StackedBarChart from "../components/charts/StackedBarChart"; // <-- NEW (step 2)
+import StackedBarChart from "../components/charts/StackedBarChart";
 import DonutChart from "../components/charts/DonutChart";
 import SavingsGoalsProgressList from "../components/goals/SavingsGoalsProgressList";
+import MonthPicker, { PickerPanel } from "../components/common/MonthPicker";
+import useMediaQuery from "../hooks/useMediaQuery";
 import { getCategoryMeta } from "../utils/categoryIcons";
 
 const MONTH_NAMES = [
@@ -47,8 +47,9 @@ const MONTH_SHORT = [
 const ACCOUNT_COLORS = ["#10b981", "#6366f1", "#f59e0b", "#ec4899", "#0ea5e9", "#8b5cf6", "#f97316"];
 
 export default function AnalyticsPage() {
-  const { user } = useAuth(); // <-- NEW
-  const isPremiumPlus = user?.role === "premium" || user?.role === "admin"; // <-- NEW
+  const { user } = useAuth();
+  const isPremiumPlus = user?.role === "premium" || user?.role === "admin";
+  const isPhone = useMediaQuery("(max-width: 639px)");
 
   const now = new Date();
   const [period, setPeriod] = useState({ year: now.getFullYear(), month: now.getMonth() + 1 });
@@ -57,9 +58,9 @@ export default function AnalyticsPage() {
   const [summary, setSummary] = useState(null);
   const [categoryData, setCategoryData] = useState([]);
   const [trendData, setTrendData] = useState([]);
-  const [trendLocked, setTrendLocked] = useState(false); // true if trend call 403s even though we expected access
-  const [categoryTrendData, setCategoryTrendData] = useState([]); // <-- NEW (step 2)
-  const [categoryTrendLocked, setCategoryTrendLocked] = useState(false); // <-- NEW (step 2)
+  const [trendLocked, setTrendLocked] = useState(false);
+  const [categoryTrendData, setCategoryTrendData] = useState([]);
+  const [categoryTrendLocked, setCategoryTrendLocked] = useState(false);
   const [goals, setGoals] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -73,8 +74,7 @@ export default function AnalyticsPage() {
     let cancelled = false;
     setLoading(true);
 
-    // Custom date range is Premium+ only. When active, summary and
-    // spending-by-category are fetched by range instead of month/year.
+    // Custom date range is Premium+ only.
     const useRange = isPremiumPlus && dateRange;
 
     const calls = [
@@ -88,12 +88,10 @@ export default function AnalyticsPage() {
       getAccounts(),
     ];
 
-    // Only fetch monthly-trend / category-trend for Premium/Admin — User
-    // tier doesn't get these endpoints per the role table, so skip the
-    // calls (and the guaranteed 403) entirely for User tier.
+    // Only fetch monthly-trend / category-trend for Premium/Admin.
     if (isPremiumPlus) {
       calls.push(getMonthlyTrend(6));
-      calls.push(getCategoryTrend(6)); // <-- NEW (step 2)
+      calls.push(getCategoryTrend(6));
     }
 
     Promise.allSettled(calls)
@@ -134,7 +132,6 @@ export default function AnalyticsPage() {
             }
           }
 
-          // <-- NEW (step 2)
           if (categoryTrendRes.status === "fulfilled") {
             setCategoryTrendData(Array.isArray(categoryTrendRes.value.data) ? categoryTrendRes.value.data : []);
             setCategoryTrendLocked(false);
@@ -213,9 +210,7 @@ export default function AnalyticsPage() {
     };
   });
 
-  // User tier: simple single-month income vs expense comparison,
-  // built from /analytics/summary (which User tier already has access to)
-  // instead of the Premium-only /monthly-trend endpoint.
+  // User tier: single-month income vs expense comparison from /analytics/summary
   const simpleComparisonData = [
     {
       month: `${MONTH_SHORT[period.month - 1]} '${String(period.year).slice(2)}`,
@@ -224,9 +219,7 @@ export default function AnalyticsPage() {
     },
   ];
 
-  // ---- Category trend (step 2) -> stacked bar data + category/color list ----
-  // Distinct categories across all months, ordered by total spend (desc) so
-  // the biggest categories anchor the bottom of the stack and the legend.
+  // Category trend -> stacked bar data + category/color list
   const categoryTotals = {};
   categoryTrendData.forEach((point) => {
     Object.entries(point.categories || {}).forEach(([cat, amt]) => {
@@ -256,25 +249,23 @@ export default function AnalyticsPage() {
   const currentMonthLabel = new Date(period.year, period.month - 1)
     .toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
-  // What to show under "Spending by Category" — the active custom range,
-  // or the selected month/year when no range is active.
   const categoryPeriodLabel = dateRange
     ? `${dateRange.startDate} → ${dateRange.endDate}`
     : `${MONTH_NAMES[period.month - 1]} ${period.year}`;
 
   return (
-    <div className="max-w-6xl mx-auto px-8 py-10 space-y-6">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-5 sm:space-y-6">
 
       {/* HEADER */}
-      <div className="flex items-start justify-between gap-6 flex-wrap">
+      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 lg:gap-6">
         <div>
-          <h1 className="font-display text-2xl text-ink">Analytics</h1>
+          <h1 className="font-display text-xl sm:text-2xl text-ink">Analytics</h1>
           <p className="text-sm text-slate mt-1">
             Spending trends, category breakdowns, and savings progress.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Export buttons: Premium/Admin only */}
           {isPremiumPlus && (
             <>
@@ -283,7 +274,7 @@ export default function AnalyticsPage() {
                 onClick={() => handleExport("pdf")}
                 disabled={exportLoading !== ""}
                 title="Export as PDF"
-                className="flex items-center gap-1.5 px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-ink bg-white hover:border-coral transition-colors disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 py-2.5 sm:py-2 border border-slate-200 rounded-lg text-xs font-semibold text-ink bg-white hover:border-coral transition-colors disabled:opacity-50"
               >
                 <FileText size={14} className="text-coral" />
                 {exportLoading === "pdf" ? "…" : "PDF"}
@@ -294,7 +285,7 @@ export default function AnalyticsPage() {
                 onClick={() => handleExport("excel")}
                 disabled={exportLoading !== ""}
                 title="Export as Excel"
-                className="flex items-center gap-1.5 px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-ink bg-white hover:border-emerald transition-colors disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 py-2.5 sm:py-2 border border-slate-200 rounded-lg text-xs font-semibold text-ink bg-white hover:border-emerald transition-colors disabled:opacity-50"
               >
                 <FileSpreadsheet size={14} className="text-emerald" />
                 {exportLoading === "excel" ? "…" : "Excel"}
@@ -310,13 +301,15 @@ export default function AnalyticsPage() {
                 onApply={setDateRange}
                 onClear={() => setDateRange(null)}
               />
-              <MonthYearPicker
+              <MonthPicker
                 selected={period}
                 onSelect={(p) => { setDateRange(null); setPeriod(p); }}
+                allowAllTime={false}
+                format="long"
               />
             </>
           ) : (
-            <span className="px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate bg-slate-50">
+            <span className="px-3 py-2.5 sm:py-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate bg-slate-50">
               {currentMonthLabel}
             </span>
           )}
@@ -327,8 +320,8 @@ export default function AnalyticsPage() {
         <div className="card p-10 text-center text-sm text-slate">Loading analytics…</div>
       ) : (
         <>
-          {/* SUMMARY CARDS */}
-          <div className="grid grid-cols-5 gap-4">
+          {/* SUMMARY CARDS: 2 across on phone, 3 on tablet, 5 on laptop */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
             <StatCard
               label="Total Income"
               value={`₹${(summary?.total_income ?? 0).toLocaleString("en-IN")}`}
@@ -358,31 +351,34 @@ export default function AnalyticsPage() {
               value={`₹${(summary?.total_balance ?? 0).toLocaleString("en-IN")}`}
               icon={Landmark}
               color="emerald"
+              className="col-span-2 md:col-span-1"
             />
           </div>
 
           {/* ROW 1: SPENDING BY CATEGORY + INCOME VS EXPENSES */}
-          <div className="grid grid-cols-2 gap-5 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 items-start">
 
-            {/* 1. SPENDING BY CATEGORY */}
-            <div className="card p-6">
-              <h2 className="flex items-center gap-2 font-display text-lg text-ink mb-1">
+            <div className="card p-4 sm:p-6 min-w-0">
+              <h2 className="flex items-center gap-2 font-display text-base sm:text-lg text-ink mb-1">
                 <PieChartIcon size={17} className="text-indigo" />
                 Spending by Category
               </h2>
-              <p className="text-xs text-slate mb-4">
-                {categoryPeriodLabel}
-              </p>
+              <p className="text-xs text-slate mb-4">{categoryPeriodLabel}</p>
               {pieData.length > 0 ? (
-                <SpendingPieChart data={pieData} currencyLabel="Total Expenses" size={270} />
+                <div className="overflow-x-auto flex justify-center">
+                  <SpendingPieChart
+                    data={pieData}
+                    currencyLabel="Total Expenses"
+                    size={isPhone ? 220 : 270}
+                  />
+                </div>
               ) : (
                 <p className="text-sm text-slate">No expense data for this period.</p>
               )}
             </div>
 
-            {/* 2. INCOME VS EXPENSES */}
-            <div className="card p-6">
-              <h2 className="flex items-center gap-2 font-display text-lg text-ink mb-1">
+            <div className="card p-4 sm:p-6 min-w-0">
+              <h2 className="flex items-center gap-2 font-display text-base sm:text-lg text-ink mb-1">
                 <BarChart3 size={17} className="text-emerald" />
                 Income vs Expenses
               </h2>
@@ -390,27 +386,27 @@ export default function AnalyticsPage() {
                 {isPremiumPlus ? "Last 6 months" : currentMonthLabel}
               </p>
 
-              {isPremiumPlus ? (
-                trendLocked ? (
-                  <p className="text-sm text-slate">
-                    Upgrade to Premium to see your 6-month income vs expenses trend.
-                  </p>
+              {/* If the chart is wider than the phone, it scrolls inside the card */}
+              <div className="overflow-x-auto">
+                {isPremiumPlus ? (
+                  trendLocked ? (
+                    <p className="text-sm text-slate">
+                      Upgrade to Premium to see your 6-month income vs expenses trend.
+                    </p>
+                  ) : (
+                    <GroupedBarChart data={barData} />
+                  )
                 ) : (
-                  <GroupedBarChart data={barData} />
-                )
-              ) : (
-                // User tier: simple current-month comparison, built from
-                // /analytics/summary rather than the Premium-only trend endpoint.
-                <GroupedBarChart data={simpleComparisonData} />
-              )}
+                  <GroupedBarChart data={simpleComparisonData} />
+                )}
+              </div>
             </div>
-
           </div>
 
-          {/* ROW 1.5: CATEGORY BREAKDOWN OVER TIME — Premium/Admin only (step 2) */}
+          {/* ROW 1.5: CATEGORY BREAKDOWN OVER TIME — Premium/Admin only */}
           {isPremiumPlus && (
-            <div className="card p-6">
-              <h2 className="flex items-center gap-2 font-display text-lg text-ink mb-1">
+            <div className="card p-4 sm:p-6 min-w-0">
+              <h2 className="flex items-center gap-2 font-display text-base sm:text-lg text-ink mb-1">
                 <LayoutGrid size={17} className="text-purple-600" />
                 Category Breakdown Over Time
               </h2>
@@ -421,43 +417,44 @@ export default function AnalyticsPage() {
                   Upgrade to Premium to see how your spending by category has changed over time.
                 </p>
               ) : (
-                <StackedBarChart data={stackedData} categories={stackedCategories} />
+                <div className="overflow-x-auto">
+                  <StackedBarChart data={stackedData} categories={stackedCategories} />
+                </div>
               )}
             </div>
           )}
 
-          {/* ROW 2: SAVINGS GOALS PROGRESS (left) + ACCOUNT BALANCE BREAKDOWN (right) */}
-          <div className="grid grid-cols-2 gap-5 items-start">
+          {/* ROW 2: SAVINGS GOALS PROGRESS + ACCOUNT BALANCE BREAKDOWN */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 items-start">
 
-            {/* 3. SAVINGS GOALS PROGRESS — left */}
-            <div className="card p-6 h-fit">
-              <h2 className="flex items-center gap-2 font-display text-lg text-ink mb-5">
+            <div className="card p-4 sm:p-6 h-fit min-w-0">
+              <h2 className="flex items-center gap-2 font-display text-base sm:text-lg text-ink mb-5">
                 <Target size={17} className="text-orange-500" />
                 Savings Goals Progress
               </h2>
               <SavingsGoalsProgressList goals={goals} />
             </div>
 
-            {/* 4. ACCOUNT BALANCE BREAKDOWN — right */}
-            <div className="card p-6">
-              <h2 className="flex items-center gap-2 font-display text-lg text-ink mb-1">
+            <div className="card p-4 sm:p-6 min-w-0">
+              <h2 className="flex items-center gap-2 font-display text-base sm:text-lg text-ink mb-1">
                 <Landmark size={17} className="text-purple-600" />
                 Account Balance Breakdown
               </h2>
               <p className="text-xs text-slate mb-4">Across all accounts</p>
               {accountDonutData.length > 0 ? (
-                <DonutChart
-                  data={accountDonutData}
-                  size={220}
-                  thickness={20}
-                  centerLabel={`₹${accountTotal.toLocaleString("en-IN")}`}
-                  centerSubLabel="Total Balance"
-                />
+                <div className="flex justify-center">
+                  <DonutChart
+                    data={accountDonutData}
+                    size={isPhone ? 190 : 220}
+                    thickness={20}
+                    centerLabel={`₹${accountTotal.toLocaleString("en-IN")}`}
+                    centerSubLabel="Total Balance"
+                  />
+                </div>
               ) : (
                 <p className="text-sm text-slate">No accounts added yet.</p>
               )}
             </div>
-
           </div>
         </>
       )}
@@ -480,8 +477,8 @@ function DateRangePicker({ value, onApply, onClear }) {
     const handleClick = (e) => {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false);
     };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    document.addEventListener("pointerdown", handleClick);
+    return () => document.removeEventListener("pointerdown", handleClick);
   }, []);
 
   useEffect(() => {
@@ -496,134 +493,57 @@ function DateRangePicker({ value, onApply, onClear }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`flex items-center gap-2 px-3 py-2 border rounded-lg text-xs font-semibold transition-colors ${
+        className={`flex items-center gap-2 px-3 py-2.5 sm:py-2 border rounded-lg text-xs font-semibold transition-colors ${
           value ? "border-emerald text-emerald bg-emerald-soft/40" : "border-slate-200 text-ink bg-white hover:border-emerald"
         }`}
       >
-        {value ? `${value.startDate} → ${value.endDate}` : "Custom Range"}
+        <span className="truncate max-w-[11rem] sm:max-w-none">
+          {value ? `${value.startDate} → ${value.endDate}` : "Custom Range"}
+        </span>
         <ChevronDown size={14} className={value ? "text-emerald" : "text-slate"} />
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-lg z-50 p-3 space-y-2">
-          <label className="block text-[11px] font-semibold text-slate">
-            Start date
-            <input
-              type="date"
-              value={start}
-              onChange={(e) => setStart(e.target.value)}
-              className="mt-1 w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs"
-            />
-          </label>
-          <label className="block text-[11px] font-semibold text-slate">
-            End date
-            <input
-              type="date"
-              value={end}
-              onChange={(e) => setEnd(e.target.value)}
-              className="mt-1 w-full px-2 py-1.5 border border-slate-200 rounded-lg text-xs"
-            />
-          </label>
+        <PickerPanel onClose={() => setOpen(false)}>
+          <div className="space-y-3">
+            <label className="block text-[11px] font-semibold text-slate">
+              Start date
+              <input
+                type="date"
+                value={start}
+                onChange={(e) => setStart(e.target.value)}
+                className="mt-1 w-full px-2 py-2 border border-slate-200 rounded-lg text-xs"
+              />
+            </label>
+            <label className="block text-[11px] font-semibold text-slate">
+              End date
+              <input
+                type="date"
+                value={end}
+                onChange={(e) => setEnd(e.target.value)}
+                className="mt-1 w-full px-2 py-2 border border-slate-200 rounded-lg text-xs"
+              />
+            </label>
 
-          <div className="flex items-center justify-between pt-1">
-            <button
-              type="button"
-              onClick={() => { setStart(""); setEnd(""); onClear(); setOpen(false); }}
-              className="text-[11px] font-semibold text-slate hover:text-coral"
-            >
-              Clear
-            </button>
-            <button
-              type="button"
-              disabled={!isValid}
-              onClick={() => { onApply({ startDate: start, endDate: end }); setOpen(false); }}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald text-white disabled:opacity-40"
-            >
-              Apply
-            </button>
+            <div className="flex items-center justify-between pt-1">
+              <button
+                type="button"
+                onClick={() => { setStart(""); setEnd(""); onClear(); setOpen(false); }}
+                className="text-[11px] font-semibold text-slate hover:text-coral py-2"
+              >
+                Clear
+              </button>
+              <button
+                type="button"
+                disabled={!isValid}
+                onClick={() => { onApply({ startDate: start, endDate: end }); setOpen(false); }}
+                className="px-4 py-2 rounded-lg text-xs font-semibold bg-emerald text-white disabled:opacity-40"
+              >
+                Apply
+              </button>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-
-/* ============================================================
-   MONTH / YEAR PICKER
-============================================================ */
-
-function MonthYearPicker({ selected, onSelect }) {
-  const [open, setOpen] = useState(false);
-  const [viewYear, setViewYear] = useState(selected.year);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const handleClick = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
-
-  useEffect(() => { setViewYear(selected.year); }, [selected.year]);
-
-  const label = new Date(selected.year, selected.month - 1)
-    .toLocaleDateString("en-US", { month: "long", year: "numeric" });
-
-  const now = new Date();
-  const isFutureMonth = (m) => viewYear === now.getFullYear() && m > now.getMonth() + 1;
-  const isFutureYear = viewYear >= now.getFullYear();
-
-  return (
-    <div className="relative" ref={ref}>
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-ink bg-white hover:border-emerald transition-colors"
-      >
-        {label}
-        <ChevronDown size={14} className="text-slate" />
-      </button>
-
-      {open && (
-        <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-lg z-50 p-3">
-          <div className="flex items-center justify-between px-1 mb-2">
-            <button type="button" onClick={() => setViewYear((y) => y - 1)} className="p-1 hover:bg-slate-50 rounded">
-              <ChevronLeft size={15} className="text-slate" />
-            </button>
-            <span className="text-xs font-semibold text-ink">{viewYear}</span>
-            <button
-              type="button"
-              onClick={() => setViewYear((y) => y + 1)}
-              disabled={isFutureYear}
-              className="p-1 hover:bg-slate-50 rounded disabled:opacity-30"
-            >
-              <ChevronRight size={15} className="text-slate" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-3 gap-1">
-            {MONTH_NAMES.map((m, i) => {
-              const monthNum = i + 1;
-              const isSelected = selected.year === viewYear && selected.month === monthNum;
-              const disabled = isFutureMonth(monthNum);
-              return (
-                <button
-                  type="button"
-                  key={m}
-                  disabled={disabled}
-                  onClick={() => { onSelect({ year: viewYear, month: monthNum }); setOpen(false); }}
-                  className={`px-2 py-2 rounded-lg text-xs font-semibold transition-colors ${
-                    isSelected ? "bg-emerald text-white" : disabled ? "text-slate-300 cursor-not-allowed" : "text-ink hover:bg-slate-50"
-                  }`}
-                >
-                  {m.slice(0, 3)}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        </PickerPanel>
       )}
     </div>
   );
@@ -634,7 +554,7 @@ function MonthYearPicker({ selected, onSelect }) {
    STAT CARD
 ============================================================ */
 
-function StatCard({ label, value, icon: Icon, color }) {
+function StatCard({ label, value, icon: Icon, color, className = "" }) {
   const styles = {
     emerald: { bg: "bg-emerald-soft", text: "text-emerald" },
     coral: { bg: "bg-coral-soft", text: "text-coral" },
@@ -643,14 +563,14 @@ function StatCard({ label, value, icon: Icon, color }) {
   }[color];
 
   return (
-    <div className="card p-5">
-      <div className="flex items-center gap-3 mb-3">
-        <div className={`w-9 h-9 rounded-xl ${styles.bg} flex items-center justify-center`}>
+    <div className={`card p-4 sm:p-5 min-w-0 ${className}`}>
+      <div className="flex items-center gap-2.5 sm:gap-3 mb-3">
+        <div className={`w-9 h-9 rounded-xl ${styles.bg} flex items-center justify-center shrink-0`}>
           <Icon size={16} className={styles.text} strokeWidth={2.2} />
         </div>
-        <p className="text-xs font-semibold text-ink">{label}</p>
+        <p className="text-xs font-semibold text-ink truncate">{label}</p>
       </div>
-      <p className={`font-mono text-xl font-bold ${styles.text}`}>{value}</p>
+      <p className={`font-mono text-lg sm:text-xl font-bold ${styles.text} truncate`}>{value}</p>
     </div>
   );
 }

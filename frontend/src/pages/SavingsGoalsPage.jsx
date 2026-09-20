@@ -47,14 +47,14 @@ export default function SavingsGoalsPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-8 py-10">
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
       {view === "list" && (
-        <div className="card p-6">
-          <div className="flex items-center justify-between mb-5">
+        <div className="card p-4 sm:p-6">
+          <div className="flex items-center justify-between gap-3 mb-5">
             <h1 className="font-display text-lg text-ink">My Goals</h1>
             <button
               onClick={() => setView("add")}
-              className="flex items-center gap-1.5 bg-emerald text-white px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity"
+              className="flex items-center gap-1.5 bg-emerald text-white px-3 sm:px-4 py-2.5 sm:py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
             >
               <Plus size={16} strokeWidth={2.5} />
               Add Goal
@@ -65,13 +65,13 @@ export default function SavingsGoalsPage() {
       )}
 
       {view === "add" && (
-        <div className="card p-6">
+        <div className="card p-4 sm:p-6">
           <SavingsGoalForm onAdded={handleAdded} onCancel={() => setView("list")} />
         </div>
       )}
 
       {view === "detail" && selectedGoal && (
-        <div className="card p-6">
+        <div className="card p-4 sm:p-6">
           <SavingsGoalDetail
             goal={selectedGoal}
             onBack={() => setView("list")}

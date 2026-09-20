@@ -78,27 +78,27 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="max-w-3xl mx-auto px-8 py-10">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
         <div className="card p-10 text-center text-sm text-slate">Loading profile…</div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-8 py-10 space-y-6">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-5 sm:space-y-6">
       <div>
-        <h1 className="font-display text-2xl text-ink">Profile</h1>
+        <h1 className="font-display text-xl sm:text-2xl text-ink">Profile</h1>
         <p className="text-sm text-slate mt-1">Your account details and preferences.</p>
       </div>
 
       {/* IDENTITY CARD — locked fields */}
-      <div className="card p-6">
+      <div className="card p-4 sm:p-6">
         <div className="flex items-center gap-4 mb-6">
           <div className="w-14 h-14 rounded-full bg-emerald text-white flex items-center justify-center text-xl font-semibold uppercase shrink-0">
             {profile?.username?.[0]}
           </div>
-          <div>
-            <p className="font-display text-lg text-ink">{profile?.username}</p>
+          <div className="min-w-0">
+            <p className="font-display text-lg text-ink truncate">{profile?.username}</p>
             {profile?.is_verified ? (
               <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald mt-0.5">
                 <BadgeCheck size={14} />
@@ -112,14 +112,14 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="flex items-center gap-1.5 text-xs font-semibold text-slate mb-1.5">
               <User size={13} /> Username
             </label>
-            <div className="field bg-slate-50 text-slate flex items-center justify-between">
-              {profile?.username}
-              <Lock size={13} className="text-slate-300" />
+            <div className="field bg-slate-50 text-slate flex items-center justify-between gap-2">
+              <span className="truncate">{profile?.username}</span>
+              <Lock size={13} className="text-slate-300 shrink-0" />
             </div>
           </div>
 
@@ -127,9 +127,9 @@ export default function ProfilePage() {
             <label className="flex items-center gap-1.5 text-xs font-semibold text-slate mb-1.5">
               <Mail size={13} /> Email
             </label>
-            <div className="field bg-slate-50 text-slate flex items-center justify-between">
-              {profile?.email}
-              <Lock size={13} className="text-slate-300" />
+            <div className="field bg-slate-50 text-slate flex items-center justify-between gap-2">
+              <span className="truncate">{profile?.email}</span>
+              <Lock size={13} className="text-slate-300 shrink-0" />
             </div>
           </div>
         </div>
@@ -140,7 +140,7 @@ export default function ProfilePage() {
 
       {/* SUBSCRIPTION CARD — only for non-premium, non-admin users */}
       {profile?.role === "user" && (
-        <div className="card p-6">
+        <div className="card p-4 sm:p-6">
           <h2 className="font-display text-lg text-ink mb-2">Subscription</h2>
           <p className="text-sm text-slate mb-4">
             You're currently on the free plan. Request Premium access and an admin will review it.
@@ -149,7 +149,7 @@ export default function ProfilePage() {
             type="button"
             onClick={handleRequestPremium}
             disabled={requestingPremium || premiumRequested}
-            className="bg-emerald text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="w-full sm:w-auto bg-emerald text-white px-5 py-3 sm:py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
           >
             {premiumRequested ? "Request Sent" : requestingPremium ? "Sending…" : "Request Premium Access"}
           </button>
@@ -157,10 +157,10 @@ export default function ProfilePage() {
       )}
 
       {/* EDITABLE DETAILS */}
-      <form onSubmit={handleSave} className="card p-6 space-y-5">
+      <form onSubmit={handleSave} className="card p-4 sm:p-6 space-y-5">
         <h2 className="font-display text-lg text-ink">Personal Details</h2>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-slate mb-1.5">Full Name</label>
             <input
@@ -174,7 +174,7 @@ export default function ProfilePage() {
           </div>
 
           <div>
-            <label className="flex items-center gap-1.5 text-xs font-semibold text-slate mb-1.5">
+            <label className="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-slate mb-1.5">
               <Phone size={13} /> Phone Number <span className="text-slate-300 font-normal">(optional)</span>
             </label>
             <input
@@ -188,7 +188,7 @@ export default function ProfilePage() {
         </div>
 
         <div>
-          <label className="flex items-center gap-1.5 text-xs font-semibold text-slate mb-1.5">
+          <label className="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-slate mb-1.5">
             <Wallet size={13} /> Monthly Income <span className="text-slate-300 font-normal">(optional)</span>
           </label>
           <input
@@ -203,7 +203,7 @@ export default function ProfilePage() {
         </div>
 
         <div>
-          <label className="flex items-center gap-1.5 text-xs font-semibold text-slate mb-1.5">
+          <label className="flex flex-wrap items-center gap-1.5 text-xs font-semibold text-slate mb-1.5">
             <NotebookPen size={13} /> Financial Preferences <span className="text-slate-300 font-normal">(optional)</span>
           </label>
           <textarea
@@ -218,7 +218,7 @@ export default function ProfilePage() {
         <button
           type="submit"
           disabled={saving}
-          className="bg-emerald text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="w-full sm:w-auto bg-emerald text-white px-5 py-3 sm:py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
         >
           {saving ? "Saving…" : "Save Changes"}
         </button>

@@ -28,7 +28,10 @@ export default function ExpenseList({ expenses, onDeleted, onEdit }) {
         const { icon: Icon, bg, text } = getCategoryMeta(e.category);
         const isConfirming = confirmingId === e.id;
         return (
-          <li key={e.id} className="group flex items-center justify-between py-2.5 rounded-lg hover:bg-slate-50/60 px-1 -mx-1 transition-colors">
+          <li
+            key={e.id}
+            className="group flex items-center justify-between gap-3 py-2.5 rounded-lg hover:bg-slate-50/60 px-1 -mx-1 transition-colors"
+          >
             <div className="flex items-center gap-3 min-w-0">
               <div className={`w-9 h-9 rounded-lg ${bg} flex items-center justify-center shrink-0`}>
                 <Icon size={16} className={text} strokeWidth={2.2} />
@@ -48,28 +51,33 @@ export default function ExpenseList({ expenses, onDeleted, onEdit }) {
                 <button
                   onClick={() => handleDelete(e.id)}
                   disabled={deleting}
-                  className="px-2.5 py-1 rounded-full text-xs font-semibold bg-coral text-white hover:opacity-90 disabled:opacity-50"
+                  className="px-3 py-1.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-semibold bg-coral text-white hover:opacity-90 disabled:opacity-50"
                 >
                   {deleting ? "…" : "Delete"}
                 </button>
                 <button
                   onClick={() => setConfirmingId(null)}
                   disabled={deleting}
-                  className="px-2.5 py-1 rounded-full text-xs font-semibold border border-slate-300 text-slate"
+                  className="px-3 py-1.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-semibold border border-slate-300 text-slate"
                 >
                   Cancel
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-3 shrink-0">
+              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                 <span className="font-mono text-sm font-semibold text-coral">-₹{e.amount.toFixed(0)}</span>
+                {/* Always visible on phones (no hover there); hover-only on laptops */}
                 <button
                   onClick={() => setConfirmingId(e.id)}
-                  className="opacity-0 group-hover:opacity-100 text-[10px] text-coral hover:underline transition-opacity"
+                  className="p-1 text-xs sm:text-[10px] text-coral hover:underline transition-opacity sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100"
                 >
                   Delete
                 </button>
-                <button onClick={() => onEdit(e)} className="text-slate hover:text-emerald transition-colors">
+                <button
+                  onClick={() => onEdit(e)}
+                  aria-label="Edit expense"
+                  className="p-1 text-slate hover:text-emerald transition-colors"
+                >
                   <ArrowRight size={16} />
                 </button>
               </div>

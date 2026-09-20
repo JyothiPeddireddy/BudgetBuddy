@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Bell, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import {
   getNotifications,
   markNotificationRead,
@@ -19,6 +19,7 @@ const TABS = [
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
+  // (kept from your original code; not used in the layout below)
   const [notifPermission, setNotifPermission] = useState(
     typeof Notification !== "undefined" ? Notification.permission : "unsupported"
   );
@@ -67,15 +68,9 @@ export default function NotificationsPage() {
   const counts = {
     all: notifications.length,
     unread: notifications.filter((n) => !n.is_read).length,
-    alerts: notifications.filter(
-      (n) => getNotificationMeta(n.type).tab === "alerts"
-    ).length,
-    reminders: notifications.filter(
-      (n) => getNotificationMeta(n.type).tab === "reminders"
-    ).length,
-    updates: notifications.filter(
-      (n) => getNotificationMeta(n.type).tab === "updates"
-    ).length,
+    alerts: notifications.filter((n) => getNotificationMeta(n.type).tab === "alerts").length,
+    reminders: notifications.filter((n) => getNotificationMeta(n.type).tab === "reminders").length,
+    updates: notifications.filter((n) => getNotificationMeta(n.type).tab === "updates").length,
   };
 
   const filtered = notifications.filter((n) => {
@@ -87,20 +82,32 @@ export default function NotificationsPage() {
   const grouped = groupByDay(filtered);
 
   return (
-    <div className="max-w-6xl mx-auto px-8 py-10">
-      <h1 className="font-display text-2xl text-ink mb-1">Notifications</h1>
-      <p className="text-sm text-slate mb-6">
-        Stay updated with important alerts and updates.
-      </p>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+      <div className="flex items-start justify-between gap-3 mb-5 sm:mb-6">
+        <div>
+          <h1 className="font-display text-xl sm:text-2xl text-ink mb-1">Notifications</h1>
+          <p className="text-sm text-slate">
+            Stay updated with important alerts and updates.
+          </p>
+        </div>
 
-      <div className="grid grid-cols-3 gap-5">
-        <div className="col-span-2 card p-6">
+        {/* Phone/tablet: "Mark all as read" lives up here because the side panel is hidden */}
+        <button
+          onClick={handleMarkAllRead}
+          className="lg:hidden shrink-0 text-xs text-emerald font-semibold hover:underline py-2"
+        >
+          Mark all as read
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2 card p-4 sm:p-6 min-w-0">
           <div className="flex items-center gap-2 mb-5 flex-wrap">
             {TABS.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                className={`px-3.5 py-2 sm:py-1.5 rounded-full text-xs font-semibold border transition-colors ${
                   activeTab === tab.key
                     ? "bg-emerald-soft border-emerald text-emerald"
                     : "border-slate-200 text-slate hover:border-slate-300"
@@ -129,7 +136,7 @@ export default function NotificationsPage() {
                         <li
                           key={n.id}
                           onClick={() => !n.is_read && handleRead(n.id)}
-                          className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-colors ${
+                          className={`flex items-start gap-3 p-3 sm:p-3.5 rounded-xl border cursor-pointer transition-colors ${
                             n.is_read
                               ? "border-slate-100"
                               : "border-emerald-soft bg-emerald-soft/30 hover:bg-emerald-soft/50"
@@ -138,21 +145,23 @@ export default function NotificationsPage() {
                           <div
                             className={`w-9 h-9 rounded-lg ${bg} flex items-center justify-center shrink-0`}
                           >
-                            <Icon
-                              size={16}
-                              className={text}
-                              strokeWidth={2.2}
-                            />
+                            <Icon size={16} className={text} strokeWidth={2.2} />
                           </div>
 
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-ink">
+                            <p className="text-sm font-semibold text-ink break-words">
                               {n.message}
+                            </p>
+
+                            {/* Phone: time sits under the message */}
+                            <p className="sm:hidden text-[11px] text-slate mt-1">
+                              {timeAgo(n.created_at)}
                             </p>
                           </div>
 
                           <div className="flex items-center gap-2 shrink-0">
-                            <span className="text-xs text-slate whitespace-nowrap">
+                            {/* Tablet/laptop: time sits on the right */}
+                            <span className="hidden sm:inline text-xs text-slate whitespace-nowrap">
                               {timeAgo(n.created_at)}
                             </span>
 
@@ -162,10 +171,10 @@ export default function NotificationsPage() {
 
                             <button
                               onClick={(e) => handleDelete(n.id, e)}
-                              className="text-slate hover:text-coral transition-colors"
+                              className="p-1.5 -m-1 text-slate hover:text-coral transition-colors"
                               aria-label="Delete notification"
                             >
-                              <Trash2 size={14} />
+                              <Trash2 size={15} />
                             </button>
                           </div>
                         </li>
@@ -178,7 +187,8 @@ export default function NotificationsPage() {
           )}
         </div>
 
-        <div className="space-y-5">
+        {/* Filter side panel: laptop only (the tabs above do the same job on phones) */}
+        <div className="hidden lg:block space-y-5">
           <div className="card p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-display text-base text-ink">Filter</h2>

@@ -204,7 +204,8 @@ body {
 }
 .auth-field:focus {
   border-color: var(--color-indigo);
-  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.08);
+  /* was a purple glow (79,70,229) — changed to match the teal theme */
+  box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.12);
 }
 .auth-field::placeholder {
   color: #A3AEA5;
@@ -258,4 +259,92 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   .toast-item { animation: none; }
+}
+
+
+/* ============================================================
+   RESPONSIVE / MOBILE
+============================================================ */
+
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 0;
+}
+
+html {
+  /* stops phones from auto-enlarging text when rotated */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* Prevent long text/numbers from expanding cards */
+* {
+  min-width: 0;
+}
+
+/* Better touch interaction on mobile */
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Tablets and below */
+@media (max-width: 1024px) {
+  /* Wide tables (reports, transactions) scroll sideways inside
+     their own box instead of breaking the whole page.
+     Wrap a table like: <div className="table-scroll"><table>…</table></div> */
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Phones */
+@media (max-width: 640px) {
+  .card {
+    border-radius: 16px;
+  }
+
+  /* iPhones zoom the page in when you tap an input smaller than 16px.
+     This keeps every form field at 16px on phones so that never happens. */
+  .field,
+  .auth-field,
+  .ledger-input,
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  .auth-title {
+    font-size: 30px;
+  }
+
+  .auth-subtitle {
+    font-size: 14px;
+    margin-bottom: 28px;
+  }
+
+  /* Toasts should never be wider than the screen */
+  .toast-item {
+    min-width: 0;
+    max-width: calc(100vw - 2rem);
+  }
+}
+
+/* Very small phones */
+@media (max-width: 380px) {
+  .card {
+    border-radius: 14px;
+  }
+
+  .auth-title {
+    font-size: 26px;
+  }
 }

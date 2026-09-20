@@ -45,11 +45,8 @@ export default function IncomeForm({ onAdded, editingIncome, onUpdated, onCancel
       return;
     }
 
-    // Description/Notes is now mandatory -- guard client-side too, since
-    // the input's `required` attribute alone won't stop a programmatic
-    // submit. Requiring a short note makes each income entry easier to
-    // identify later (e.g. "Freelance - Logo design for Acme Corp"
-    // instead of just "Freelance").
+    // Description/Notes is mandatory -- guard client-side too, since
+    // the input's `required` attribute alone won't stop a programmatic submit.
     if (!notes.trim()) {
       setError("Description is required.");
       return;
@@ -84,7 +81,8 @@ export default function IncomeForm({ onAdded, editingIncome, onUpdated, onCancel
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-4 gap-3">
+      {/* 1 column on phones, 2 columns from tablet up (was a cramped 4 columns) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <input
           type="text" required value={source}
           onChange={(e) => setSource(e.target.value)}
@@ -97,7 +95,7 @@ export default function IncomeForm({ onAdded, editingIncome, onUpdated, onCancel
           ))}
         </select>
         <input
-          type="number" step="0.01" min="0.01" required
+          type="number" step="0.01" min="0.01" required inputMode="decimal"
           value={amount} onChange={(e) => setAmount(e.target.value)}
           placeholder="Amount" className="field"
         />
@@ -112,10 +110,10 @@ export default function IncomeForm({ onAdded, editingIncome, onUpdated, onCancel
         placeholder="Description (e.g. Freelance project - logo design)" className="field"
       />
       {error && <p className="text-sm text-coral">{error}</p>}
-      <div className="flex gap-3">
+      <div className="flex flex-col-reverse sm:flex-row gap-3">
         <button
           type="submit" disabled={submitting || !accountId}
-          className="bg-emerald text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="w-full sm:w-auto bg-emerald text-white px-5 py-3 sm:py-2.5 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
         >
           {submitting ? "Saving…" : isEditing ? "Update income" : "Add income"}
         </button>
@@ -123,7 +121,7 @@ export default function IncomeForm({ onAdded, editingIncome, onUpdated, onCancel
           <button
             type="button"
             onClick={onCancelEdit}
-            className="px-5 py-2.5 rounded-lg text-sm text-slate hover:text-ink transition-colors"
+            className="w-full sm:w-auto px-5 py-3 sm:py-2.5 rounded-lg text-sm text-slate hover:text-ink border border-slate-200 sm:border-0 transition-colors"
           >
             Cancel
           </button>

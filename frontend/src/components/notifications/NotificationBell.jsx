@@ -50,8 +50,8 @@ export default function NotificationBell() {
     const handleClick = (e) => {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false);
     };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    document.addEventListener("pointerdown", handleClick);
+    return () => document.removeEventListener("pointerdown", handleClick);
   }, []);
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
@@ -92,18 +92,28 @@ export default function NotificationBell() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="relative p-2 rounded-lg hover:bg-slate-100 transition-colors"
+        className="relative p-2.5 sm:p-2 rounded-lg hover:bg-slate-100 transition-colors"
+        aria-label="Notifications"
       >
         <Bell size={19} className="text-slate" strokeWidth={2} />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-coral text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+          <span className="absolute top-0.5 right-0.5 sm:-top-0.5 sm:-right-0.5 w-4 h-4 bg-coral text-white text-[10px] font-bold rounded-full flex items-center justify-center">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-xl shadow-lg z-30 max-h-96 overflow-y-auto">
+        /* Phone: pinned under the top bar with 12px margins (always fits the screen).
+           Laptop: normal dropdown under the bell. */
+        <div
+          className="
+            fixed left-3 right-3 top-[4.25rem] z-40
+            max-h-[70dvh] overflow-y-auto
+            bg-white border border-slate-200 rounded-xl shadow-lg
+            sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-80 sm:max-h-96
+          "
+        >
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
             <p className="text-sm font-semibold text-ink">Notifications</p>
             {unreadCount > 0 && (
@@ -134,14 +144,16 @@ export default function NotificationBell() {
                     <p className="text-xs text-ink">{cleanMessage(n.message)}</p>
                     <p className="text-[10px] text-slate mt-1">{timeAgo(n.created_at)}</p>
                   </div>
+                  {/* Always visible on touch screens; hover-only on laptops */}
                   <button
                     type="button"
                     onClick={(e) => handleDelete(e, n.id)}
                     disabled={deletingId === n.id}
                     title="Delete notification"
-                    className="shrink-0 p-1 rounded-md text-slate-300 hover:text-coral hover:bg-coral-soft opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+                    aria-label="Delete notification"
+                    className="shrink-0 p-1.5 sm:p-1 rounded-md text-slate hover:text-coral hover:bg-coral-soft sm:text-slate-300 sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity disabled:opacity-50"
                   >
-                    <Trash2 size={13} />
+                    <Trash2 size={14} />
                   </button>
                 </li>
               ))}

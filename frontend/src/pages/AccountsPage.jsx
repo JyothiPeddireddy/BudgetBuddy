@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Plus, X } from "lucide-react";
+import { Plus } from "lucide-react";
 import { getAccounts, getBalanceTrend } from "../api/accounts";
 import { useToast } from "../context/ToastContext";
 import AccountForm from "../components/accounts/AccountForm";
 import AccountTable from "../components/accounts/AccountTable";
 import TotalBalanceCard from "../components/accounts/TotalBalanceCard";
 import LineChart from "../components/charts/LineChart";
+import Modal from "../components/common/Modal";
 
 export default function AccountsPage() {
   const [accounts, setAccounts] = useState([]);
@@ -71,33 +72,29 @@ export default function AccountsPage() {
 
   const totalBalance = accounts.reduce((sum, a) => sum + a.balance, 0);
 
+  const selectClass =
+    "flex-1 sm:flex-none min-w-0 px-3 py-2.5 sm:py-2 rounded-lg border border-slate-200 text-sm font-semibold text-ink bg-white";
+
   return (
-    <div className="max-w-6xl mx-auto px-8 py-10 space-y-6">
-      <div className="flex items-start justify-between gap-6">
-        <div>
-          <h1 className="font-display text-2xl text-ink">Accounts</h1>
-        </div>
-        <div className="flex items-center gap-3">
-          <select
-            value={bankFilter}
-            onChange={(e) => setBankFilter(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-semibold text-ink bg-white"
-          >
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-5 sm:space-y-6">
+      {/* HEADER */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-6">
+        <h1 className="font-display text-xl sm:text-2xl text-ink">Accounts</h1>
+
+        <div className="flex items-center gap-2 sm:gap-3">
+          <select value={bankFilter} onChange={(e) => setBankFilter(e.target.value)} className={selectClass}>
             {banks.map((b) => <option key={b} value={b}>{b}</option>)}
           </select>
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-semibold text-ink bg-white"
-          >
+          <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className={selectClass}>
             {types.map((t) => <option key={t} value={t}>{t}</option>)}
           </select>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-5">
+      {/* BALANCE + TREND: stacked on phone, side by side from tablet up */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
         <TotalBalanceCard totalBalance={totalBalance} />
-        <div className="card p-6">
+        <div className="card p-4 sm:p-6 overflow-hidden">
           <p className="text-sm font-semibold text-ink mb-3">Monthly Trend</p>
           {trend.length > 0 ? (
             <LineChart data={trend} height={90} />
@@ -109,40 +106,34 @@ export default function AccountsPage() {
         </div>
       </div>
 
-      <div className="card p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display text-lg text-ink">Your Accounts</h2>
+      {/* ACCOUNTS LIST */}
+      <div className="card p-4 sm:p-6">
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <h2 className="font-display text-base sm:text-lg text-ink">Your Accounts</h2>
           <button
             onClick={openAdd}
-            className="flex items-center gap-1.5 bg-emerald text-white px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity"
+            className="flex items-center gap-1.5 bg-emerald text-white px-3 sm:px-4 py-2.5 sm:py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity shrink-0"
           >
             <Plus size={16} strokeWidth={2.5} />
             Add Account
           </button>
         </div>
-        <AccountTable accounts={filteredAccounts} onDeleted={handleDeleted} onEdit={openEdit} />
+
+        {/* If the table is wider than the phone, it scrolls sideways inside the card */}
+        <div className="overflow-x-auto">
+          <AccountTable accounts={filteredAccounts} onDeleted={handleDeleted} onEdit={openEdit} />
+        </div>
       </div>
 
       {modalOpen && (
-        <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 relative">
-            <button
-              onClick={closeModal}
-              className="absolute top-5 right-5 text-slate hover:text-ink"
-            >
-              <X size={20} />
-            </button>
-            <h2 className="font-display text-lg text-ink mb-5">
-              {editingAccount ? "Edit Account" : "Add Account"}
-            </h2>
-            <AccountForm
-              onAdded={handleAdded}
-              onUpdated={handleUpdated}
-              editingAccount={editingAccount}
-              onCancelEdit={closeModal}
-            />
-          </div>
-        </div>
+        <Modal title={editingAccount ? "Edit Account" : "Add Account"} onClose={closeModal} maxWidth="max-w-md">
+          <AccountForm
+            onAdded={handleAdded}
+            onUpdated={handleUpdated}
+            editingAccount={editingAccount}
+            onCancelEdit={closeModal}
+          />
+        </Modal>
       )}
     </div>
   );

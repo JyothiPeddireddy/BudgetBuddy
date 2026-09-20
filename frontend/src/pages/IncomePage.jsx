@@ -1,13 +1,13 @@
-import { useEffect, useState, useRef } from "react";
-import { Plus, X, Wallet, Calendar, Crown, Repeat, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Plus, Wallet, Calendar, Crown, Repeat } from "lucide-react";
 import { getIncomes } from "../api/transactions";
 import { useToast } from "../context/ToastContext";
 import IncomeForm from "../components/income/IncomeForm";
 import IncomeList from "../components/income/IncomeList";
 import DonutChart from "../components/charts/DonutChart";
+import Modal from "../components/common/Modal";
+import MonthPicker from "../components/common/MonthPicker";
 import { getSourceMeta } from "../utils/sourceIcons";
-
-const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 export default function IncomePage() {
   const [incomes, setIncomes] = useState([]);
@@ -82,21 +82,25 @@ export default function IncomePage() {
   const recentIncomes = [...filtered].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 4);
 
   return (
-    <div className="max-w-6xl mx-auto px-8 py-10 space-y-6">
-      <div className="flex items-start justify-between gap-6 flex-wrap">
-        <div><h1 className="font-display text-2xl text-ink">Income</h1></div>
-        <div className="flex items-center gap-3">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-5 sm:space-y-6">
+      {/* HEADER */}
+      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 lg:gap-6">
+        <h1 className="font-display text-xl sm:text-2xl text-ink">Income</h1>
+
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <select
             value={sourceFilter}
             onChange={(e) => setSourceFilter(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-slate-200 text-sm font-semibold text-ink bg-white"
+            className="flex-1 sm:flex-none min-w-[9rem] px-3 py-2.5 sm:py-2 rounded-lg border border-slate-200 text-sm font-semibold text-ink bg-white"
           >
             {sources.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
+
           <MonthPicker selected={selectedMonth} onSelect={setSelectedMonth} />
+
           <button
             onClick={openAdd}
-            className="flex items-center gap-1.5 bg-emerald text-white px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity"
+            className="w-full sm:w-auto flex items-center justify-center gap-1.5 bg-emerald text-white px-4 py-2.5 sm:py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity"
           >
             <Plus size={16} strokeWidth={2.5} />
             Add Income
@@ -104,28 +108,29 @@ export default function IncomePage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
-        <div className="card p-5">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-soft flex items-center justify-center">
+      {/* STAT CARDS: 2x2 on phone, 4 across on laptop */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="card p-4 sm:p-5">
+          <div className="flex items-center gap-2.5 sm:gap-3 mb-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-soft flex items-center justify-center shrink-0">
               <Wallet size={18} className="text-emerald" strokeWidth={2.2} />
             </div>
-            <p className="text-xs font-semibold text-ink">Total Income</p>
+            <p className="text-xs font-semibold text-ink truncate">Total Income</p>
           </div>
-          <p className="font-mono text-xl font-bold text-emerald">₹{totalIncome.toFixed(0)}</p>
+          <p className="font-mono text-lg sm:text-xl font-bold text-emerald truncate">₹{totalIncome.toFixed(0)}</p>
           {totalPct !== null && (
             <p className="text-xs font-semibold mt-1.5 text-emerald">▲ {totalPct}% this month</p>
           )}
         </div>
 
-        <div className="card p-5">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-soft flex items-center justify-center">
+        <div className="card p-4 sm:p-5">
+          <div className="flex items-center gap-2.5 sm:gap-3 mb-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-soft flex items-center justify-center shrink-0">
               <Calendar size={18} className="text-emerald" strokeWidth={2.2} />
             </div>
-            <p className="text-xs font-semibold text-ink">This Month</p>
+            <p className="text-xs font-semibold text-ink truncate">This Month</p>
           </div>
-          <p className="font-mono text-xl font-bold text-ink">₹{thisMonthTotal.toFixed(0)}</p>
+          <p className="font-mono text-lg sm:text-xl font-bold text-ink truncate">₹{thisMonthTotal.toFixed(0)}</p>
           {monthPct !== null && (
             <p className={`text-xs font-semibold mt-1.5 ${monthPct >= 0 ? "text-emerald" : "text-coral"}`}>
               {monthPct >= 0 ? "▲" : "▼"} {Math.abs(monthPct)}% vs last month
@@ -133,16 +138,16 @@ export default function IncomePage() {
           )}
         </div>
 
-        <div className="card p-5">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-soft flex items-center justify-center">
+        <div className="card p-4 sm:p-5">
+          <div className="flex items-center gap-2.5 sm:gap-3 mb-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-soft flex items-center justify-center shrink-0">
               <Crown size={18} className="text-indigo" strokeWidth={2.2} />
             </div>
-            <p className="text-xs font-semibold text-ink">Top Source</p>
+            <p className="text-xs font-semibold text-ink truncate">Top Source</p>
           </div>
           {topSource ? (
             <>
-              <p className="font-display text-lg font-bold text-ink">{topSource[0]}</p>
+              <p className="font-display text-base sm:text-lg font-bold text-ink truncate">{topSource[0]}</p>
               <p className="text-xs font-semibold text-slate mt-1">{topSourcePct}% of total</p>
             </>
           ) : (
@@ -150,14 +155,14 @@ export default function IncomePage() {
           )}
         </div>
 
-        <div className="card p-5">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
+        <div className="card p-4 sm:p-5">
+          <div className="flex items-center gap-2.5 sm:gap-3 mb-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-orange-100 flex items-center justify-center shrink-0">
               <Repeat size={18} className="text-orange-600" strokeWidth={2.2} />
             </div>
-            <p className="text-xs font-semibold text-ink">Transactions</p>
+            <p className="text-xs font-semibold text-ink truncate">Transactions</p>
           </div>
-          <p className="font-mono text-xl font-bold text-ink">{transactionCount}</p>
+          <p className="font-mono text-lg sm:text-xl font-bold text-ink">{transactionCount}</p>
           {prevPeriod && (
             <p className={`text-xs font-semibold mt-1.5 ${countDiff >= 0 ? "text-emerald" : "text-coral"}`}>
               {countDiff >= 0 ? "▲" : "▼"} {Math.abs(countDiff)} vs last month
@@ -166,16 +171,19 @@ export default function IncomePage() {
         </div>
       </div>
 
-      <div className="flex gap-5 items-start flex-wrap">
-        <div className="card p-6 flex-1 min-w-[320px]">
-          <h2 className="font-display text-lg text-ink mb-4">Recent Income</h2>
+      {/* LIST + DONUT */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4 sm:gap-5 items-start">
+        <div className="card p-4 sm:p-6 min-w-0">
+          <h2 className="font-display text-base sm:text-lg text-ink mb-4">Recent Income</h2>
           <IncomeList incomes={recentIncomes} onDeleted={handleDeleted} onEdit={openEdit} />
         </div>
 
-        <div className="card p-6 w-fit">
-          <h2 className="font-display text-lg text-ink mb-4">Income Sources</h2>
+        <div className="card p-4 sm:p-6 min-w-0">
+          <h2 className="font-display text-base sm:text-lg text-ink mb-4">Income Sources</h2>
           {donutData.length > 0 ? (
-            <DonutChart data={donutData} size={140} thickness={20} centerLabel={`₹${thisMonthTotal.toFixed(0)}`} />
+            <div className="flex justify-center">
+              <DonutChart data={donutData} size={140} thickness={20} centerLabel={`₹${thisMonthTotal.toFixed(0)}`} />
+            </div>
           ) : (
             <p className="text-sm text-slate">No income recorded for this period.</p>
           )}
@@ -183,75 +191,14 @@ export default function IncomePage() {
       </div>
 
       {modalOpen && (
-        <div className="fixed inset-0 bg-ink/40 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 relative">
-            <button onClick={closeModal} className="absolute top-5 right-5 text-slate hover:text-ink">
-              <X size={20} />
-            </button>
-            <h2 className="font-display text-lg text-ink mb-5">
-              {editingIncome ? "Edit Income" : "Add Income"}
-            </h2>
-            <IncomeForm
-              onAdded={handleAdded}
-              editingIncome={editingIncome}
-              onUpdated={handleUpdated}
-              onCancelEdit={closeModal}
-            />
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function MonthPicker({ selected, onSelect }) {
-  const [open, setOpen] = useState(false);
-  const [viewYear, setViewYear] = useState(selected?.year ?? new Date().getFullYear());
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const handleClick = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
-
-  const label = selected
-    ? new Date(selected.year, selected.month - 1).toLocaleDateString("en-US", { month: "short", year: "numeric" })
-    : "All time";
-
-  const now = new Date();
-  const isFutureMonth = (m) => viewYear === now.getFullYear() && m > now.getMonth() + 1;
-  const isFutureYear = viewYear >= now.getFullYear();
-
-  return (
-    <div className="relative" ref={ref}>
-      <button onClick={() => setOpen((o) => !o)} className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-sm font-semibold text-ink bg-white hover:border-emerald transition-colors">
-        {label}
-        <ChevronDown size={14} className="text-slate" />
-      </button>
-      {open && (
-        <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-lg z-20 p-3">
-          <button onClick={() => { onSelect(null); setOpen(false); }} className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold mb-2 ${!selected ? "bg-emerald text-white" : "text-ink hover:bg-slate-50"}`}>
-            All time
-          </button>
-          <div className="flex items-center justify-between px-1 mb-2">
-            <button onClick={() => setViewYear((y) => y - 1)} className="p-1 hover:bg-slate-50 rounded"><ChevronLeft size={15} className="text-slate" /></button>
-            <span className="text-xs font-semibold text-ink">{viewYear}</span>
-            <button onClick={() => setViewYear((y) => y + 1)} disabled={isFutureYear} className="p-1 hover:bg-slate-50 rounded disabled:opacity-30"><ChevronRight size={15} className="text-slate" /></button>
-          </div>
-          <div className="grid grid-cols-3 gap-1">
-            {MONTHS.map((m, i) => {
-              const monthNum = i + 1;
-              const isSelected = selected?.year === viewYear && selected?.month === monthNum;
-              const disabled = isFutureMonth(monthNum);
-              return (
-                <button key={m} disabled={disabled} onClick={() => { onSelect({ year: viewYear, month: monthNum }); setOpen(false); }} className={`px-2 py-2 rounded-lg text-xs font-semibold ${isSelected ? "bg-emerald text-white" : disabled ? "text-slate-300 cursor-not-allowed" : "text-ink hover:bg-slate-50"}`}>
-                  {m.slice(0, 3)}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <Modal title={editingIncome ? "Edit Income" : "Add Income"} onClose={closeModal} maxWidth="max-w-lg">
+          <IncomeForm
+            onAdded={handleAdded}
+            editingIncome={editingIncome}
+            onUpdated={handleUpdated}
+            onCancelEdit={closeModal}
+          />
+        </Modal>
       )}
     </div>
   );
