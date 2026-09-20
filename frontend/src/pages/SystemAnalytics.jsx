@@ -346,7 +346,7 @@ export default function SystemAnalytics() {
 
             {/* PHONE: one card per user */}
             {manageableUsers.length > 0 && (
-              <ul className="md:hidden divide-y divide-slate-100">
+              <ul className="sm:hidden divide-y divide-slate-100">
                 {manageableUsers.map((u) => (
                   <li key={u.id} className="py-4 space-y-3">
                     <div className="flex items-start justify-between gap-3">
@@ -383,7 +383,7 @@ export default function SystemAnalytics() {
 
             {/* TABLET / LAPTOP: table */}
             {manageableUsers.length > 0 && (
-              <div className="hidden md:block overflow-x-auto">
+              <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-left text-[11px] font-semibold text-slate border-b border-slate-200">
