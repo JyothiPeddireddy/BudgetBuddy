@@ -19,7 +19,6 @@ const CATEGORIES = [
   "Shopping",
   "Education",
   "Entertainment",
-  "Miscellaneous",
   "Bills", 
   "Others"
 ];

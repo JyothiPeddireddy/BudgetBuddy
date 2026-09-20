@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { addExpense, updateExpense } from "../../api/transactions";
 import { getAccounts } from "../../api/accounts";
 
-const CATEGORIES = ["Food", "Travel", "Shopping", "Education", "Entertainment", "Miscellaneous"];
+const CATEGORIES = ["Food", "Travel", "Shopping", "Education", "Entertainment", "Bills", "Others"];
 
 export default function ExpenseForm({ onAdded, editingExpense, onUpdated, onCancelEdit }) {
   const [accounts, setAccounts] = useState([]);

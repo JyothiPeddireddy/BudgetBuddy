@@ -7,7 +7,7 @@ import ExpenseList from "../components/expenses/ExpenseList";
 import DonutChart from "../components/charts/DonutChart";
 import { getCategoryMeta } from "../utils/categoryIcons";
 
-const CATEGORIES = ["Food", "Travel", "Shopping", "Education", "Entertainment", "Bills", "Others", "Miscellaneous"];
+const CATEGORIES = ["Food", "Travel", "Shopping", "Education", "Entertainment", "Bills", "Others"];
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 export default function ExpensesPage() {
