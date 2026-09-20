@@ -1,144 +1,137 @@
-import { useEffect, useState } from "react";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
+  Receipt,
   Wallet,
-  ArrowDownCircle,
-  ArrowUpCircle,
   PiggyBank,
+  LogOut,
+  Landmark,
   Target,
-  BarChart3,
-  FileText,
-  Settings,
-  Bell,
+  User,
+  Mail,
+  ChevronDown,
+  ShieldCheck,
   Menu,
   X,
-  LogOut,
-  User,
+  BarChart3,
+  PieChart,
 } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import NotificationBell from "../notifications/NotificationBell";
+import useMediaQuery from "../../hooks/useMediaQuery";
+
+const BASE_NAV_ITEMS = [
+  { to: "/dashboard", label: "Dashboard", end: true, icon: LayoutDashboard },
+  { to: "/dashboard/accounts", label: "Accounts", icon: Landmark },
+  { to: "/dashboard/income", label: "Income", icon: Wallet },
+  { to: "/dashboard/expenses", label: "Expenses", icon: Receipt },
+  { to: "/dashboard/budgets", label: "Budgets", icon: PiggyBank },
+  { to: "/dashboard/goals", label: "Goals", icon: Target },
+  { to: "/dashboard/reports", label: "Reports", icon: BarChart3 },
+  { to: "/dashboard/analytics", label: "Analytics", icon: PieChart },
+  { to: "/dashboard/profile", label: "Profile", icon: User },
+];
+
+// Admin-only nav item (backend still gates it either way)
+const ADMIN_NAV_ITEM = {
+  to: "/dashboard/system-analytics",
+  label: "Admin",
+  icon: ShieldCheck,
+};
+
+const ROLE_LABELS = {
+  admin: "Admin",
+  premium: "Premium User",
+  user: "User",
+};
+
+const ROLE_BADGE_STYLES = {
+  admin: "bg-purple-100 text-purple-700",
+  premium: "bg-emerald-soft text-emerald",
+  user: "bg-slate-100 text-slate",
+};
 
 export default function DashboardShell() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
 
-  const location = useLocation();
-
-  const closeMobileMenu = () => {
-    setMobileMenuOpen(false);
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
   };
 
-  // Close mobile sidebar whenever the route changes
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [location.pathname]);
+  const navItems =
+    user?.role === "admin" ? [...BASE_NAV_ITEMS, ADMIN_NAV_ITEM] : BASE_NAV_ITEMS;
 
-  const navItems = [
-    {
-      label: "Overview",
-      path: "/dashboard",
-      icon: LayoutDashboard,
-    },
-    {
-      label: "Accounts",
-      path: "/accounts",
-      icon: Wallet,
-    },
-    {
-      label: "Income",
-      path: "/income",
-      icon: ArrowUpCircle,
-    },
-    {
-      label: "Expenses",
-      path: "/expenses",
-      icon: ArrowDownCircle,
-    },
-    {
-      label: "Budgets",
-      path: "/budgets",
-      icon: PiggyBank,
-    },
-    {
-      label: "Goals",
-      path: "/goals",
-      icon: Target,
-    },
-    {
-      label: "Analytics",
-      path: "/analytics",
-      icon: BarChart3,
-    },
-    {
-      label: "Reports",
-      path: "/reports",
-      icon: FileText,
-    },
-    {
-      label: "Notifications",
-      path: "/notifications",
-      icon: Bell,
-    },
-    {
-      label: "Settings",
-      path: "/settings",
-      icon: Settings,
-    },
-  ];
+  const closeMobileMenu = () => setMobileMenuOpen(false);
+
+  // Stop the page behind the open drawer from scrolling
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
+
+  // If the window is resized to laptop width, close the drawer
+  useEffect(() => {
+    if (isDesktop) setMobileMenuOpen(false);
+  }, [isDesktop]);
 
   return (
-    <div className="min-h-screen bg-paper text-ink flex">
-
-      {/* Mobile Overlay */}
+    <div className="min-h-screen flex bg-paper overflow-x-clip">
+      {/* Mobile overlay */}
       {mobileMenuOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+        <button
+          type="button"
+          aria-label="Close menu"
           onClick={closeMobileMenu}
+          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar (slide-in drawer on phone/tablet, fixed column on laptop) */}
       <aside
         className={`
           fixed inset-y-0 left-0 z-50
-          w-64 max-w-[85vw]
-          lg:w-60
-          bg-ink
+          w-64 max-w-[85vw] lg:w-60 bg-ink
           flex flex-col justify-between gap-6
           py-6 lg:py-8 px-5
           overflow-y-auto
-
           transform transition-transform duration-300 ease-in-out
-
-          lg:static
-          lg:z-auto
-          lg:translate-x-0
-
-          ${
-            mobileMenuOpen
-              ? "translate-x-0"
-              : "-translate-x-full"
-          }
+          lg:static lg:z-auto lg:translate-x-0
+          ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
-        {/* Sidebar Top */}
         <div>
+          {/* Logo */}
+          <div className="flex items-center justify-between mb-8 lg:mb-10 px-1">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-emerald flex items-center justify-center shrink-0">
+                <Wallet size={16} className="text-white" strokeWidth={2.4} />
+              </div>
 
-          {/* Logo + Mobile Close */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="text-xl font-bold text-paper">
-              Budget Buddy
+              <div>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="font-display text-lg text-paper">Budget</span>
+                  <span className="font-display text-lg text-paper">Buddy</span>
+                </div>
+
+                <p className="text-[10px] text-paper/40 font-mono tracking-wide -mt-0.5">
+                  Plan · Save · Grow
+                </p>
+              </div>
             </div>
 
-            {/* Close button - mobile/tablet only */}
+            {/* Close button - phone/tablet only */}
             <button
               type="button"
               onClick={closeMobileMenu}
-              className="
-                lg:hidden
-                p-1
-                text-paper/70
-                hover:text-paper
-                transition-colors
-              "
+              className="lg:hidden p-1 text-paper/70 hover:text-paper"
               aria-label="Close navigation"
             >
               <X size={22} />
@@ -152,136 +145,143 @@ export default function DashboardShell() {
 
               return (
                 <NavLink
-                  key={item.path}
-                  to={item.path}
+                  key={item.to}
+                  to={item.to}
+                  end={item.end}
                   onClick={closeMobileMenu}
                   className={({ isActive }) =>
-                    `
-                    flex items-center gap-3
-                    px-3 py-2.5
-                    rounded-lg
-                    text-sm font-medium
-                    transition-colors
-
-                    ${
+                    `flex items-center gap-3 px-3 py-2.5 text-sm rounded-lg transition-colors ${
                       isActive
-                        ? "bg-emerald text-white"
-                        : "text-paper/70 hover:bg-white/10 hover:text-paper"
-                    }
-                    `
+                        ? "bg-gold text-ink font-medium"
+                        : "text-paper/60 hover:bg-paper/10 hover:text-paper"
+                    }`
                   }
                 >
-                  <Icon size={19} />
-                  <span>{item.label}</span>
+                  <Icon size={17} strokeWidth={2} />
+                  {item.label}
                 </NavLink>
               );
             })}
           </nav>
         </div>
 
-        {/* Sidebar Bottom */}
-        <div className="space-y-2">
+        {/* Bottom user section */}
+        <div className="px-1">
+          <div className="flex items-center gap-2.5 mb-4 px-2 py-2 rounded-lg bg-paper/5 border border-paper/10">
+            <div className="w-7 h-7 rounded-full bg-gold text-ink flex items-center justify-center text-xs font-semibold uppercase shrink-0">
+              {user?.username?.[0]}
+            </div>
 
-          <NavLink
-            to="/profile"
-            onClick={closeMobileMenu}
-            className={({ isActive }) =>
-              `
-              flex items-center gap-3
-              px-3 py-2.5
-              rounded-lg
-              text-sm font-medium
-              transition-colors
-
-              ${
-                isActive
-                  ? "bg-emerald text-white"
-                  : "text-paper/70 hover:bg-white/10 hover:text-paper"
-              }
-              `
-            }
-          >
-            <User size={19} />
-            <span>Profile</span>
-          </NavLink>
+            <p className="text-xs text-paper/70 font-mono truncate">
+              {user?.username}
+            </p>
+          </div>
 
           <button
-            type="button"
-            className="
-              w-full
-              flex items-center gap-3
-              px-3 py-2.5
-              rounded-lg
-              text-sm font-medium
-              text-paper/70
-              hover:bg-white/10
-              hover:text-paper
-              transition-colors
-            "
+            onClick={handleLogout}
+            className="flex items-center gap-2 w-full text-xs px-3 py-2.5 rounded-md border border-paper/15 text-paper/60 hover:border-brick hover:text-brick transition-colors"
           >
-            <LogOut size={19} />
-            <span>Logout</span>
+            <LogOut size={14} />
+            Sign out
           </button>
-
         </div>
       </aside>
 
-      {/* Main Area */}
-      <div className="flex-1 min-w-0">
-
-        {/* Top Bar */}
-        <div
-          className="
-            sticky top-0 z-30
-            bg-paper
-            border-b border-slate-100
-            lg:border-0
-            lg:static
-
-            flex items-center justify-between
-            gap-3
-
-            px-4 sm:px-6 lg:px-8
-            py-3 sm:py-4
-            lg:pt-6 lg:pb-0
-          "
-        >
-
-          {/* Hamburger - mobile/tablet only */}
+      {/* Main
+          NOTE: no "overflow-y-auto" here any more — it stopped the mobile
+          top bar from staying pinned while scrolling. */}
+      <main className="flex-1 min-w-0">
+        {/* Top bar: pinned to the top on phones so the menu button is always reachable */}
+        <div className="sticky top-0 z-30 bg-paper border-b border-slate-100 lg:border-0 lg:static flex items-center justify-between gap-3 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:pt-6 lg:pb-0">
+          {/* Mobile menu button */}
           <button
             type="button"
             onClick={() => setMobileMenuOpen(true)}
-            className="
-              lg:hidden
-              w-10 h-10
-              rounded-lg
-              border border-slate-200
-              bg-white
-              flex items-center justify-center
-              text-ink
-              hover:border-emerald
-              transition-colors
-            "
+            className="lg:hidden w-10 h-10 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-ink hover:border-emerald transition-colors"
             aria-label="Open navigation"
           >
             <Menu size={21} />
           </button>
 
-          {/* Desktop spacer */}
+          {/* Laptop spacer */}
           <div className="hidden lg:block" />
 
-          {/* Right side */}
-          <div className="flex items-center gap-3">
-            {/* Add your existing topbar content here */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <NotificationBell />
+            <ProfileMenu user={user} onLogout={handleLogout} />
           </div>
         </div>
 
-        {/* Page Content */}
-        <main className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-          <Outlet />
-        </main>
+        <Outlet />
+      </main>
+    </div>
+  );
+}
 
-      </div>
+
+/* ============================================================
+   PROFILE MENU
+============================================================ */
+
+function ProfileMenu({ user, onLogout }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handleClick);
+
+    return () => document.removeEventListener("pointerdown", handleClick);
+  }, []);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-full border border-slate-200 bg-white hover:border-emerald transition-colors"
+        aria-label="Account menu"
+      >
+        <div className="w-8 h-8 sm:w-7 sm:h-7 rounded-full bg-emerald text-white flex items-center justify-center text-xs font-semibold uppercase shrink-0">
+          {user?.username?.[0]}
+        </div>
+
+        <ChevronDown size={14} className="text-slate" />
+      </button>
+
+      {open && (
+        <div className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-2rem)] bg-white border border-slate-200 rounded-xl shadow-lg z-50 py-2">
+          <div className="px-4 py-2 border-b border-slate-100 space-y-1.5">
+            <div className="flex items-center gap-2">
+              <Mail size={14} className="text-slate shrink-0" />
+
+              <p className="text-xs text-ink font-mono truncate">{user?.email}</p>
+            </div>
+
+            <span
+              className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                ROLE_BADGE_STYLES[user?.role] || ROLE_BADGE_STYLES.user
+              }`}
+            >
+              {ROLE_LABELS[user?.role] || "User"}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={onLogout}
+            className="flex items-center gap-2 w-full text-left px-4 py-3 sm:py-2.5 text-sm font-semibold text-coral hover:bg-coral-soft transition-colors"
+          >
+            <LogOut size={15} />
+            Sign out
+          </button>
+        </div>
+      )}
     </div>
   );
 }
